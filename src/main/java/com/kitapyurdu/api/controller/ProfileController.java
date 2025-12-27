@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class ProfileController extends BaseController{
@@ -35,6 +36,20 @@ public class ProfileController extends BaseController{
         model.addAttribute("addresses", profile.addresses(userId));
         model.addAttribute("favorites", profile.favorites(userId));
         model.addAttribute("orders", profile.orders(userId));
+
+        // KONSOL LOG 3: Kullanıcı kimliği
+        System.out.println(">>> DEBUG [Controller]: Giriş yapan: " + username + " (ID: " + userId + ")");
+
+        List<UserOrder> siparisler = profile.orders(userId);
+        model.addAttribute("orders", siparisler);
+
+        // KONSOL LOG 4: Modele ne eklendi?
+        if (siparisler == null) {
+            System.out.println(">>> DEBUG [Controller]: HATA! Sipariş listesi NULL döndü!");
+        } else {
+            System.out.println(">>> DEBUG [Controller]: HTML'e gönderilen sipariş sayısı: " + siparisler.size());
+        }
+
 
         ProfileUpdateForm pf = new ProfileUpdateForm();
         pf.setKullaniciAdi(u.getKullaniciAdi());

@@ -1,361 +1,362 @@
 <!doctype html>
 <html lang="tr"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>KitapYurdu • Profil</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
-    <style>
-        /* Tablo için ufak ek stiller */
-        .table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-        .table th { font-weight: 600; color: #666; text-align: left; }
-        .table td, .table th { padding: 12px 8px; }
-        .small { font-size: 0.8rem; }
-    </style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>KitapYurdu • Profil</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+	<style>
+		/* Tablo için ufak ek stiller */
+		.table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+		.table th { font-weight: 600; color: #666; text-align: left; }
+		.table td, .table th { padding: 12px 8px; }
+		.small { font-size: 0.8rem; }
+	</style>
 </head>
 
 <body class="theme-light">
 <header class="topbar">
-    <div class="container topbar__inner">
-        <a class="brand" th:href="@{/}" href="/">
-            <span class="brand__mark">KY</span>
-            <span class="brand__text">KitapYurdu</span>
-        </a>
+	<div class="container topbar__inner">
+		<a class="brand" th:href="@{/}" href="/">
+			<span class="brand__mark">KY</span>
+			<span class="brand__text">KitapYurdu</span>
+		</a>
 
-        <nav class="nav">
-            <a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
-            <a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
-            <a class="nav__link" th:href="@{/sepet}" href="/sepet">
-                Sepet
-                <span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
-            </a>
+		<nav class="nav">
+			<a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
+			<a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
+			<a class="nav__link" th:href="@{/sepet}" href="/sepet">
+				Sepet
+				<span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+			</a>
 
-            <a class="nav__link is-active" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
-        </nav>
+			<a class="nav__link is-active" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+		</nav>
 
-        <div class="topbar__actions">
-            <a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">Admin</a>
+		<div class="topbar__actions">
+			<a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">Admin</a>
 
-            <a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">Giriş</a>
+			<a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">Giriş</a>
 
-            <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit" class="btn btn--ghost">Çıkış</button>
-            </form>
+			<form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<button type="submit" class="btn btn--ghost">Çıkış</button>
+			</form>
 
-            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
-                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
-            </button>
-        </div>
-    </div>
+			<button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+				<span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+			</button>
+		</div>
+	</div>
 </header>
 
 <main class="container">
-    <section class="section" style="margin-top:14px;">
-        <div class="section__head">
-            <h2 class="section__title">Profil</h2>
-            <p class="section__subtitle">
-                Hesap bilgileri, şifre, adres defteri ve favoriler.
-                <span class="muted" th:if="${user != null}">(@<span th:text="${user.kullaniciAdi}">kullanici</span>)</span>
-            </p>
-        </div>
+	<section class="section" style="margin-top:14px;">
+		<div class="section__head">
+			<h2 class="section__title">Profil</h2>
+			<p class="section__subtitle">
+				Hesap bilgileri, şifre, adres defteri ve favoriler.
+				<span class="muted" th:if="${user != null}">(@<span th:text="${user.kullaniciAdi}">kullanici</span>)</span>
+			</p>
+		</div>
 
-        <div class="card" th:if="${toast != null}">
-            <div class="card__body"><div class="muted" th:text="${toast}">OK</div></div>
-        </div>
-        <div class="card" th:if="${error != null}">
-            <div class="card__body"><div class="muted" th:text="${error}">Hata</div></div>
-        </div>
+		<div class="card" th:if="${toast != null}">
+			<div class="card__body"><div class="muted" th:text="${toast}">OK</div></div>
+		</div>
+		<div class="card" th:if="${error != null}">
+			<div class="card__body"><div class="muted" th:text="${error}">Hata</div></div>
+		</div>
 
-        <div class="layout" style="gap:16px; align-items:start;">
-            <section class="results">
-                <div class="card">
-                    <div class="card__header">
-                        <h3 class="card__title">Hesap Bilgileri</h3>
-                        <p class="card__desc">Kullanıcı adı ve e-posta değişikliğinde tekillik kontrolü yapılır.</p>
-                    </div>
+		<div class="layout" style="gap:16px; align-items:start;">
+			<section class="results">
+				<div class="card">
+					<div class="card__header">
+						<h3 class="card__title">Hesap Bilgileri</h3>
+						<p class="card__desc">Kullanıcı adı ve e-posta değişikliğinde tekillik kontrolü yapılır.</p>
+					</div>
 
-                    <div class="card__body">
-                        <form th:action="@{/profil/hesap}" method="post" th:object="${profileForm}" class="filters">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<div class="card__body">
+						<form th:action="@{/profil/hesap}" method="post" th:object="${profileForm}" class="filters">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                            <div class="grid2">
-                                <div class="field">
-                                    <label class="label">Kullanıcı Adı</label>
-                                    <input class="input" th:field="*{kullaniciAdi}" required />
-                                </div>
-                                <div class="field">
-                                    <label class="label">E-posta</label>
-                                    <input class="input" th:field="*{eposta}" type="email" required />
-                                </div>
-                            </div>
+							<div class="grid2">
+								<div class="field">
+									<label class="label">Kullanıcı Adı</label>
+									<input class="input" th:field="*{kullaniciAdi}" required />
+								</div>
+								<div class="field">
+									<label class="label">E-posta</label>
+									<input class="input" th:field="*{eposta}" type="email" required />
+								</div>
+							</div>
 
-                            <div class="grid2">
-                                <div class="field">
-                                    <label class="label">Ad</label>
-                                    <input class="input" th:field="*{ad}" />
-                                </div>
-                                <div class="field">
-                                    <label class="label">Soyad</label>
-                                    <input class="input" th:field="*{soyad}" />
-                                </div>
-                            </div>
+							<div class="grid2">
+								<div class="field">
+									<label class="label">Ad</label>
+									<input class="input" th:field="*{ad}" />
+								</div>
+								<div class="field">
+									<label class="label">Soyad</label>
+									<input class="input" th:field="*{soyad}" />
+								</div>
+							</div>
 
-                            <div class="field">
-                                <label class="label">Telefon (opsiyonel)</label>
-                                <input class="input" th:field="*{telefon}" placeholder="05xx..." />
-                            </div>
+							<div class="field">
+								<label class="label">Telefon (opsiyonel)</label>
+								<input class="input" th:field="*{telefon}" placeholder="05xx..." />
+							</div>
 
-                            <div class="filters__actions">
-                                <button class="btn btn--secondary" type="submit">Güncelle</button>
-                            </div>
+							<div class="filters__actions">
+								<button class="btn btn--secondary" type="submit">Güncelle</button>
+							</div>
 
-                            <div class="hint muted" th:if="${user != null}">
-                                Rol: <b th:text="${user.rol}">Kullanici</b> • Kayıt: <span th:text="${user.kayitTarihi}">-</span>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section>
+							<div class="hint muted" th:if="${user != null}">
+								Rol: <b th:text="${user.rol}">Kullanici</b> • Kayıt: <span th:text="${user.kayitTarihi}">-</span>
+							</div>
+						</form>
+					</div>
+				</div>
+			</section>
 
-            <aside class="panel">
-                <div class="panel__head">
-                    <h3 class="panel__title">Şifre Değiştir</h3>
-                </div>
+			<aside class="panel">
+				<div class="panel__head">
+					<h3 class="panel__title">Şifre Değiştir</h3>
+				</div>
 
-                <form th:action="@{/profil/sifre}" method="post" th:object="${passForm}" class="filters">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<form th:action="@{/profil/sifre}" method="post" th:object="${passForm}" class="filters">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                    <div class="field">
-                        <label class="label">Mevcut Şifre</label>
-                        <input class="input" th:field="*{currentPassword}" type="password" required />
-                    </div>
+					<div class="field">
+						<label class="label">Mevcut Şifre</label>
+						<input class="input" th:field="*{currentPassword}" type="password" required />
+					</div>
 
-                    <div class="field">
-                        <label class="label">Yeni Şifre</label>
-                        <input class="input" th:field="*{newPassword}" type="password" required />
-                        <div class="hint muted">En az 6 karakter.</div>
-                    </div>
+					<div class="field">
+						<label class="label">Yeni Şifre</label>
+						<input class="input" th:field="*{newPassword}" type="password" required />
+						<div class="hint muted">En az 6 karakter.</div>
+					</div>
 
-                    <div class="field">
-                        <label class="label">Yeni Şifre (Tekrar)</label>
-                        <input class="input" th:field="*{newPassword2}" type="password" required />
-                    </div>
+					<div class="field">
+						<label class="label">Yeni Şifre (Tekrar)</label>
+						<input class="input" th:field="*{newPassword2}" type="password" required />
+					</div>
 
-                    <div class="filters__actions">
-                        <button class="btn btn--secondary" type="submit">Şifreyi Güncelle</button>
-                    </div>
-                </form>
-            </aside>
-        </div>
+					<div class="filters__actions">
+						<button class="btn btn--secondary" type="submit">Şifreyi Güncelle</button>
+					</div>
+				</form>
+			</aside>
+		</div>
 
-        <div class="layout" style="gap:16px; margin-top:16px;">
-            <aside class="panel">
-                <div class="panel__head">
-                    <h3 class="panel__title">Adres Defteri</h3>
-                    <p class="panel__desc muted">Yeni adres ekle ve varsayılanı seç.</p>
-                </div>
+		<div class="layout" style="gap:16px; margin-top:16px;">
+			<aside class="panel">
+				<div class="panel__head">
+					<h3 class="panel__title">Adres Defteri</h3>
+					<p class="panel__desc muted">Yeni adres ekle ve varsayılanı seç.</p>
+				</div>
 
-                <form class="filters" th:action="@{/profil/adres}" method="post" th:object="${addressForm}">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<form class="filters" th:action="@{/profil/adres}" method="post" th:object="${addressForm}">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                    <div class="field">
-                        <label class="label">Başlık</label>
-                        <input class="input" th:field="*{baslik}" placeholder="Ev, İş..." required />
-                    </div>
+					<div class="field">
+						<label class="label">Başlık</label>
+						<input class="input" th:field="*{baslik}" placeholder="Ev, İş..." required />
+					</div>
 
-                    <div class="grid2">
-                        <div class="field">
-                            <label class="label">İl</label>
-                            <input class="input" th:field="*{il}" required />
-                        </div>
-                        <div class="field">
-                            <label class="label">İlçe</label>
-                            <input class="input" th:field="*{ilce}" required />
-                        </div>
-                    </div>
+					<div class="grid2">
+						<div class="field">
+							<label class="label">İl</label>
+							<input class="input" th:field="*{il}" required />
+						</div>
+						<div class="field">
+							<label class="label">İlçe</label>
+							<input class="input" th:field="*{ilce}" required />
+						</div>
+					</div>
 
-                    <div class="field">
-                        <label class="label">Mahalle (ops.)</label>
-                        <input class="input" th:field="*{mahalle}" />
-                    </div>
+					<div class="field">
+						<label class="label">Mahalle (ops.)</label>
+						<input class="input" th:field="*{mahalle}" />
+					</div>
 
-                    <div class="field">
-                        <label class="label">Adres Detay</label>
-                        <textarea class="input" th:field="*{adresDetay}" rows="4" required></textarea>
-                    </div>
+					<div class="field">
+						<label class="label">Adres Detay</label>
+						<textarea class="input" th:field="*{adresDetay}" rows="4" required></textarea>
+					</div>
 
-                    <div class="grid2">
-                        <div class="field">
-                            <label class="label">Posta Kodu (ops.)</label>
-                            <input class="input" th:field="*{postaKodu}" />
-                        </div>
-                        <div class="field">
-                            <label class="label">Varsayılan</label>
-                            <label class="check" style="margin-top:10px;">
-                                <input type="checkbox" th:field="*{varsayilan}" />
-                                <span>Varsayılan yap</span>
-                            </label>
-                        </div>
-                    </div>
+					<div class="grid2">
+						<div class="field">
+							<label class="label">Posta Kodu (ops.)</label>
+							<input class="input" th:field="*{postaKodu}" />
+						</div>
+						<div class="field">
+							<label class="label">Varsayılan</label>
+							<label class="check" style="margin-top:10px;">
+								<input type="checkbox" th:field="*{varsayilan}" />
+								<span>Varsayılan yap</span>
+							</label>
+						</div>
+					</div>
 
-                    <div class="filters__actions">
-                        <button class="btn btn--secondary" type="submit">Adres Kaydet</button>
-                    </div>
-                </form>
-            </aside>
+					<div class="filters__actions">
+						<button class="btn btn--secondary" type="submit">Adres Kaydet</button>
+					</div>
+				</form>
+			</aside>
 
-            <section class="results">
-                
-                <div class="card">
-                    <div class="card__header">
-                        <h3 class="card__title">Kayıtlı Adresler</h3>
-                        <p class="card__desc">Varsayılan adres en üstte görünür.</p>
-                    </div>
+			<section class="results">
+				
+				<div class="card">
+					<div class="card__header">
+						<h3 class="card__title">Kayıtlı Adresler</h3>
+						<p class="card__desc">Varsayılan adres en üstte görünür.</p>
+					</div>
 
-                    <div class="card__body">
-                        <div th:if="${addresses == null || #lists.isEmpty(addresses)}" class="empty muted">
-                            Henüz kayıtlı adres yok.
-                        </div>
+					<div class="card__body">
+						<div th:if="${addresses == null || #lists.isEmpty(addresses)}" class="empty muted">
+							Henüz kayıtlı adres yok.
+						</div>
 
-                        <div th:if="${addresses != null && !#lists.isEmpty(addresses)}" class="miniList">
-                            <div class="miniItem" th:each="a : ${addresses}" style="display:flex; gap:12px; align-items:flex-start;">
-                                <div style="flex:1;">
-                                    <div style="display:flex; gap:8px; align-items:center;">
-                                        <b th:text="${a.baslik}">Ev</b>
-                                        <span class="badge badge--info" th:if="${a.varsayilan}">Varsayılan</span>
-                                    </div>
-                                    <div class="muted" style="margin-top:4px;">
-                                        <span th:text="${a.il}">İl</span> /
-                                        <span th:text="${a.ilce}">İlçe</span>
-                                        <span th:if="${a.mahalle != null && !a.mahalle.isBlank()}"> • <span th:text="${a.mahalle}">Mahalle</span></span>
-                                    </div>
-                                    <div style="margin-top:6px;" th:text="${a.adresDetay}">Adres detayı</div>
-                                    <div class="muted" style="margin-top:6px;" th:if="${a.postaKodu != null && !a.postaKodu.isBlank()}">
-                                        Posta Kodu: <span th:text="${a.postaKodu}">00000</span>
-                                    </div>
-                                </div>
+						<div th:if="${addresses != null && !#lists.isEmpty(addresses)}" class="miniList">
+							<div class="miniItem" th:each="a : ${addresses}" style="display:flex; gap:12px; align-items:flex-start;">
+								<div style="flex:1;">
+									<div style="display:flex; gap:8px; align-items:center;">
+										<b th:text="${a.baslik}">Ev</b>
+										<span class="badge badge--info" th:if="${a.varsayilan}">Varsayılan</span>
+									</div>
+									<div class="muted" style="margin-top:4px;">
+										<span th:text="${a.il}">İl</span> /
+										<span th:text="${a.ilce}">İlçe</span>
+										<span th:if="${a.mahalle != null && !a.mahalle.isBlank()}"> • <span th:text="${a.mahalle}">Mahalle</span></span>
+									</div>
+									<div style="margin-top:6px;" th:text="${a.adresDetay}">Adres detayı</div>
+									<div class="muted" style="margin-top:6px;" th:if="${a.postaKodu != null && !a.postaKodu.isBlank()}">
+										Posta Kodu: <span th:text="${a.postaKodu}">00000</span>
+									</div>
+								</div>
 
-                                <div style="display:flex; gap:8px; align-items:center;">
-                                    <form th:action="@{/profil/adres/{id}/varsayilan(id=${a.adresId})}" method="post" th:if="${!a.varsayilan}" style="margin:0;">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button class="btn btn--secondary btn--sm" type="submit">Varsayılan yap</button>
-                                    </form>
+								<div style="display:flex; gap:8px; align-items:center;">
+									<form th:action="@{/profil/adres/{id}/varsayilan(id=${a.adresId})}" method="post" th:if="${!a.varsayilan}" style="margin:0;">
+										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+										<button class="btn btn--secondary btn--sm" type="submit">Varsayılan yap</button>
+									</form>
 
-                                    <form th:action="@{/profil/adres/{id}/sil(id=${a.adresId})}" method="post" style="margin:0;"
-                                          onsubmit="return confirm('Bu adres silinsin mi?');">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button class="btn btn--ghost btn--sm" type="submit">Sil</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+									<form th:action="@{/profil/adres/{id}/sil(id=${a.adresId})}" method="post" style="margin:0;"
+										  onsubmit="return confirm('Bu adres silinsin mi?');">
+										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+										<button class="btn btn--ghost btn--sm" type="submit">Sil</button>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                <div class="card" style="margin-top:14px;">
-                    <div class="card__header">
-                        <h3 class="card__title">Favoriler</h3>
-                        <p class="card__desc">Favori eklediklerin burada listelenir.</p>
-                    </div>
+				<div class="card" style="margin-top:14px;">
+					<div class="card__header">
+						<h3 class="card__title">Favoriler</h3>
+						<p class="card__desc">Favori eklediklerin burada listelenir.</p>
+					</div>
 
-                    <div class="card__body">
-                        <div th:if="${favorites == null || #lists.isEmpty(favorites)}" class="empty muted">
-                            Henüz favorin yok.
-                        </div>
+					<div class="card__body">
+						<div th:if="${favorites == null || #lists.isEmpty(favorites)}" class="empty muted">
+							Henüz favorin yok.
+						</div>
 
-                        <div th:if="${favorites != null && !#lists.isEmpty(favorites)}" class="productGrid">
-                            <article class="productCard" th:each="f : ${favorites}">
-                                <a class="productCard__img" th:href="@{/kitap/{id}(id=${f.kitapId})}" href="#">
-                                    <div class="imgPh">❤️</div>
-                                    <span class="badge badge--info">Favori</span>
-                                </a>
+						<div th:if="${favorites != null && !#lists.isEmpty(favorites)}" class="productGrid">
+							<article class="productCard" th:each="f : ${favorites}">
+								<a class="productCard__img" th:href="@{/kitap/{id}(id=${f.kitapId})}" href="#">
+									<div class="imgPh">❤️</div>
+									<span class="badge badge--info">Favori</span>
+								</a>
 
-                                <div class="productCard__body">
-                                    <div class="productCard__title" th:text="${f.kitapAdi}">Kitap</div>
-                                    <div class="productCard__meta">
-                                        <span th:text="${f.yayineviAdi != null ? f.yayineviAdi : '-'}">Yayınevi</span>
-                                        <span class="dot">•</span>
-                                        <span th:text="${f.stok != null ? ('Stok: ' + f.stok) : 'Stok: -'}">Stok</span>
-                                    </div>
+								<div class="productCard__body">
+									<div class="productCard__title" th:text="${f.kitapAdi}">Kitap</div>
+									<div class="productCard__meta">
+										<span th:text="${f.yayineviAdi != null ? f.yayineviAdi : '-'}">Yayınevi</span>
+										<span class="dot">•</span>
+										<span th:text="${f.stok != null ? ('Stok: ' + f.stok) : 'Stok: -'}">Stok</span>
+									</div>
 
-                                    <div class="productCard__foot">
-                                        <div class="price">
-                                            <span class="price__value" th:text="${f.fiyat != null ? f.fiyat : '-'}">0</span>
-                                            <span class="price__cur">₺</span>
-                                        </div>
+									<div class="productCard__foot">
+										<div class="price">
+											<span class="price__value" th:text="${f.fiyat != null ? f.fiyat : '-'}">0</span>
+											<span class="price__cur">₺</span>
+										</div>
 
-                                        <form th:action="@{/profil/favori/{id}/toggle(id=${f.kitapId})}" method="post" style="margin:0;">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                            <button class="btn btn--ghost btn--sm" type="submit" title="Favoriden çıkar">Kaldır</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-                </div>
+										<form th:action="@{/profil/favori/{id}/toggle(id=${f.kitapId})}" method="post" style="margin:0;">
+											<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+											<button class="btn btn--ghost btn--sm" type="submit" title="Favoriden çıkar">Kaldır</button>
+										</form>
+									</div>
+								</div>
+							</article>
+						</div>
+					</div>
+				</div>
 
-                <div class="card" style="margin-top:14px;">
-                    <div class="card__header">
-                        <h3 class="card__title">Sipariş Geçmişi</h3>
-                        <p class="card__desc">Verdiğin siparişlerin durumunu buradan takip edebilirsin.</p>
-                    </div>
+				<div class="card" style="margin-top:14px;">
+					<div class="card__header">
+						<h3 class="card__title">Sipariş Geçmişi</h3>
+						<p class="card__desc">Verdiğin siparişlerin durumunu buradan takip edebilirsin.</p>
+					</div>
 
-                    <div class="card__body">
-                        <div th:if="${orders == null || #lists.isEmpty(orders)}" class="empty muted">
-                            Henüz bir siparişin bulunmuyor.
-                        </div>
+					<div class="card__body">
+						<div th:if="${orders == null || #lists.isEmpty(orders)}" class="empty muted">
+							Henüz bir siparişin bulunmuyor.
+						</div>
 
-                        <div th:if="${orders != null && !#lists.isEmpty(orders)}" style="overflow-x:auto;">
-                            <table class="table">
-                                <thead>
-                                    <tr style="border-bottom:1px solid #eee;">
-                                        <th>Sipariş No</th>
-                                        <th>Tarih</th>
-                                        <th>Tutar</th>
-                                        <th>Durum</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="o : ${orders}" style="border-bottom:1px solid #f9f9f9;">
-                                        <td>
-                                            <b th:text="${'#' + o.siparisId}">#1001</b>
-                                            <div class="muted small" th:text="${o.urunAdedi + ' Kalem'}">1 Kalem</div>
-                                        </td>
-                                        <td th:text="${#temporals.format(o.siparisTarihi, 'dd.MM.yyyy HH:mm')}">
-                                            01.01.2025
-                                        </td>
-                                        <td>
-                                            <span th:text="${o.genelToplam}">0.00</span> ₺
-                                        </td>
-                                        <td>
-                                            <span class="badge badge--info" th:text="${o.durumAdi}">Durum</span>
-                                        </td>
-                                        <td style="text-align:right;">
-                                            <a th:href="@{/profil/siparis/{id}(id=${o.siparisId})}" class="btn btn--ghost btn--sm">Detay</a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+						<div th:if="${orders != null && !#lists.isEmpty(orders)}" style="overflow-x:auto;">
+							<table class="table">
+								<thead>
+									<tr style="border-bottom:1px solid #eee;">
+										<th>Sipariş No</th>
+										<th>Tarih</th>
+										<th>Tutar</th>
+										<th>Durum</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="o : ${orders}" style="border-bottom:1px solid #f9f9f9;">
+										<td>
+											<b th:text="${'#' + o.siparisId}">#1001</b>
+											<div class="muted small" th:text="${o.urunAdedi + ' Kalem'}">1 Kalem</div>
+										</td>
+										<td th:text="${o.siparisTarihi != null ? #temporals.format(o.siparisTarihi, 'dd.MM.yyyy HH:mm') : '-'}">
+											01.01.2025
+										</td>
+										</td>
+										<td>
+											<span th:text="${o.genelToplam}">0.00</span> ₺
+										</td>
+										<td>
+											<span class="badge badge--info" th:text="${o.durumAdi}">Durum</span>
+										</td>
+										<td style="text-align:right;">
+											<a th:href="@{/profil/siparis/{id}(id=${o.siparisId})}" class="btn btn--ghost btn--sm">Detay</a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
 
-            </section>
-        </div>
+			</section>
+		</div>
 
-    </section>
+	</section>
 </main>
 
 <footer class="footer footer--light">
-    <div class="container footer__inner">
-        <div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
-        <div class="muted">Profil</div>
-    </div>
+	<div class="container footer__inner">
+		<div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+		<div class="muted">Profil</div>
+	</div>
 </footer>
 
 <script th:src="@{/js/theme.js}" src="/js/theme.js"></script>

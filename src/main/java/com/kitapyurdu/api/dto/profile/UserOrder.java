@@ -5,12 +5,11 @@ import java.time.LocalDateTime;
 
 public class UserOrder {
     private int siparisId;
-    private LocalDateTime siparisTarihi; // DB: SiparisTarihi
-    private BigDecimal genelToplam;      // DB: GenelToplam
-    private String durumAdi;             // DB: DurumAdi (Join'den gelen)
-    private int urunAdedi;               // View: Count(*)
+    private LocalDateTime siparisTarihi;
+    private BigDecimal genelToplam;
+    private String durumAdi;
+    private int urunAdedi;
 
-    // Getter & Setter
     public int getSiparisId() { return siparisId; }
     public void setSiparisId(int siparisId) { this.siparisId = siparisId; }
 

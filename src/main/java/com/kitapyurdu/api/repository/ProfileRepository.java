@@ -162,11 +162,14 @@ public class ProfileRepository {
         for (Map<String, Object> r : rows) {
             FavoriteBook fb = new FavoriteBook();
             fb.setKitapId(toInt(r.get("KitapId")));
-            fb.setTitle(toStr(r.get("Title")));
-            fb.setPrice((java.math.BigDecimal) r.get("Price"));
-            fb.setStock(toInt(r.get("Stock")));
-            fb.setPublisherName(toStr(r.get("PublisherName")));
-            fb.setCoverUrl(null); // resim sistemini sonra bağlayacağız
+            
+            // DÜZELTİLEN KISIMLAR BURASI:
+            fb.setKitapAdi(toStr(r.get("Title")));          // setTitle -> setKitapAdi
+            fb.setFiyat((java.math.BigDecimal) r.get("Price")); // setPrice -> setFiyat
+            fb.setStok(toInt(r.get("Stock")));              // setStock -> setStok
+            fb.setYayineviAdi(toStr(r.get("PublisherName")));// setPublisherName -> setYayineviAdi
+            
+            fb.setCoverUrl(null);
             out.add(fb);
         }
         return out;
@@ -207,30 +210,27 @@ public class ProfileRepository {
     private int boolToBitNumber(Boolean b) { return Boolean.TRUE.equals(b) ? 1 : 0; }
 
     public List<UserOrder> listOrders(int userId) {
-        // View ismimiz: vw_ProfilSiparisleri
-        // Kolonlar: SiparisId, SiparisTarihi, GenelToplam, DurumAdi, UrunAdedi
-        List<Map<String, Object>> rows = jdbc.queryForList("""
-            SELECT 
-                SiparisId, 
-                SiparisTarihi, 
-                GenelToplam, 
-                DurumAdi, 
-                UrunAdedi
-            FROM dbo.vw_ProfilSiparisleri
-            WHERE KullaniciId = ?
-            ORDER BY SiparisTarihi DESC
-        """, userId);
-            //view kullanımı
-        List<UserOrder> out = new ArrayList<>();
-        for (Map<String, Object> r : rows) {
-            UserOrder o = new UserOrder();
-            o.setSiparisId(toInt(r.get("SiparisId")));
-            o.setSiparisTarihi(toLdt(r.get("SiparisTarihi")));
-            o.setGenelToplam((java.math.BigDecimal) r.get("GenelToplam"));
-            o.setDurumAdi(toStr(r.get("DurumAdi")));
-            o.setUrunAdedi(toInt(r.get("UrunAdedi")));
-            out.add(o);
-        }
-        return out;
-    }
+    String sql = "SELECT * FROM dbo.vw_ProfilSiparisleri WHERE KullaniciId = ? ORDER BY SiparisTarihi DESC";
+
+    // KONSOL LOG 1: Sorgu başladı
+    System.out.println(">>> DEBUG [Repo]: Siparişler aranıyor. UserID: " + userId);
+
+    List<UserOrder> list = jdbc.query(sql, (rs, rowNum) -> {
+        UserOrder o = new UserOrder();
+        o.setSiparisId(rs.getInt("SiparisId"));
+        
+        java.sql.Timestamp ts = rs.getTimestamp("SiparisTarihi");
+        if (ts != null) o.setSiparisTarihi(ts.toLocalDateTime());
+        
+        o.setGenelToplam(rs.getBigDecimal("GenelToplam"));
+        o.setDurumAdi(rs.getString("DurumAdi"));
+        o.setUrunAdedi(rs.getInt("UrunAdedi"));
+        return o;
+    }, userId);
+
+    // KONSOL LOG 2: Sorgu bitti
+    System.out.println(">>> DEBUG [Repo]: Bulunan kayıt sayısı: " + list.size());
+    
+    return list;
+}
 }
