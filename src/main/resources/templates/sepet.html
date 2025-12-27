@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <title>Sepetim • KitapYurdu</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
+            <a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
+            <a class="nav__link is-active" th:href="@{/sepet}" href="/sepet">
+                Sepet
+                <span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+            </a>
+            <a class="nav__link" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">Admin</a>
+            
+            <a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">Giriş</a>
+
+            <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container" style="margin-top: 30px; margin-bottom: 60px;">
+
+    <div class="section__head" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h1 class="section__title">Sepetim</h1>
+            <p class="section__subtitle">
+                Sepetinizde <strong th:text="${cart.totalQty}">0</strong> ürün bulunuyor.
+            </p>
+        </div>
+        
+        <a class="btn btn--secondary btn--sm" th:href="@{/katalog}" href="/katalog">
+            Alışverişe Devam Et
+        </a>
+    </div>
+
+    <div class="card card--soft" style="text-align:center; padding: 40px;" 
+         th:if="${cart.items == null or #lists.isEmpty(cart.items)}">
+        <div style="font-size:3rem; margin-bottom:10px;">🛒</div>
+        <h2 style="font-size:1.5rem; margin-bottom:10px;">Sepetiniz şu an boş.</h2>
+        <p class="muted" style="margin-bottom:20px;">İhtiyacınız olan kitapları kataloğumuzda bulabilirsiniz.</p>
+        <a class="btn btn--secondary" th:href="@{/katalog}" href="/katalog">Hemen Alışverişe Başla</a>
+    </div>
+
+    <div class="grid" th:if="${cart.items != null and !#lists.isEmpty(cart.items)}">
+        
+        <div class="card">
+            <div class="card__header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 class="card__title">Ürünler</h2>
+                
+                <form th:action="@{/sepet/temizle}" method="post" style="margin:0;">
+                    <button class="btn btn--ghost btn--sm badge--err" type="submit" 
+                            onclick="return confirm('Sepeti tamamen boşaltmak istediğine emin misin?')">
+                        Sepeti Temizle
+                    </button>
+                </form>
+            </div>
+
+            <div class="card__body">
+                <div class="items">
+                    <div class="item" th:each="it : ${cart.items}" 
+                         style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:15px;">
+                        
+                        <div style="flex: 1; min-width: 200px;">
+                            <div class="item__title" style="font-weight:600; font-size:1.1em;" th:text="${it.title}">Kitap Adı</div>
+                            <div class="muted" style="font-size:0.9em; margin-top:4px;">
+                                <span th:text="'ISBN: ' + ${it.isbn}">ISBN</span> • 
+                                <span th:text="'Birim: ' + ${#numbers.formatDecimal(it.unitPrice, 1, 'POINT', 2, 'POINT')} + ' ₺'">0.00 ₺</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <form th:action="@{/sepet/guncelle}" method="post" class="qtyform" style="display:flex; align-items:center; gap:5px; margin:0;">
+                                <input type="hidden" name="bookId" th:value="${it.bookId}" />
+                                <input class="input input--sm" type="number" name="qty" min="1" 
+                                       th:attr="max=${it.stock}" th:value="${it.qty}" 
+                                       style="width:60px; text-align:center;" />
+                                <button class="btn btn--secondary btn--sm" type="submit" title="Miktarı Güncelle">↻</button>
+                            </form>
+                        </div>
+
+                        <div style="text-align:right; min-width: 100px;">
+                            <div style="font-weight:800; color:var(--text); font-size:1.1em;" 
+                                 th:text="${#numbers.formatDecimal(it.lineTotal, 1, 'POINT', 2, 'POINT')} + ' ₺'">0.00 ₺</div>
+                            
+                            <form th:action="@{/sepet/sil}" method="post" style="margin-top:5px;">
+                                <input type="hidden" name="bookId" th:value="${it.bookId}" />
+                                <button class="btn btn--link btn--sm" style="color:var(--err); text-decoration:none; font-size:0.85em;" type="submit">
+                                    Kaldır
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card--soft" style="height: fit-content; position:sticky; top:20px;">
+            <div class="card__header">
+                <h2 class="card__title">Sipariş Özeti</h2>
+            </div>
+            <div class="card__body">
+                <div class="row space">
+                    <div class="muted">Ürün Toplamı</div>
+                    <div th:text="${cart.totalQty} + ' Adet'">0</div>
+                </div>
+                
+                <div class="sep"></div>
+
+                <div class="row space">
+                    <div style="font-weight:600;">Ara Toplam</div>
+                    <div style="font-weight:800; font-size:1.2em;" 
+                         th:text="${#numbers.formatDecimal(cart.totalPrice, 1, 'POINT', 2, 'POINT')} + ' ₺'">0.00 ₺</div>
+                </div>
+
+                <div class="muted" style="font-size:0.85em; margin-top:10px;">
+                    Kargo ve indirimler ödeme adımında hesaplanacaktır.
+                </div>
+
+                <div class="sep"></div>
+
+                <a class="btn btn--secondary btn--block btn--lg" th:href="@{/siparis/tamamla}" href="/siparis/tamamla">
+                    Ödemeye Geç
+                </a>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer footer--light">
+    <div class="container footer__inner">
+        <div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+        <div class="muted">Güvenli Alışveriş</div>
+    </div>
+</footer>
+
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+
+</body>
+</html>

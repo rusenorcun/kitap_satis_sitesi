@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Çıkış Yapıldı • KitapYurdu</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+<main class="container admin" style="max-width: 520px; padding-top: 42px;">
+	<section class="card">
+		<div class="card__header">
+			<h1 class="card__title">Çıkış başarılı</h1>
+			<p class="card__desc">Anasayfaya yönlendiriliyorsun…</p>
+		</div>
+
+		<div class="card__body">
+			<p class="muted" style="margin:0;">
+				Eğer otomatik yönlendirilmezsen:
+				<a href="/" class="link">anasayfaya git</a>.
+			</p>
+		</div>
+	</section>
+</main>
+
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+
+<script>
+(function(){
+	// Toast göster
+	if (window.KYToast) {
+		KYToast.show("Çıkış başarılı. Anasayfaya yönlendiriliyorsun…", "success");
+	}
+
+	// 1.2 saniye sonra anasayfa
+	setTimeout(function(){
+		window.location.href = "/";
+	}, 2000);
+})();
+</script>
+
+</body>
+</html>

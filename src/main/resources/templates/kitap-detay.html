@@ -1,0 +1,202 @@
+<!-- =========================================================
+     03) THYMELEAF - KİTAP DETAY SAYFASI
+     Dosya: src/main/resources/templates/kitap-detay.html
+     ========================================================= -->
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>KitapYurdu • Ana Sayfa</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+<header class="topbar">
+	<div class="container topbar__inner">
+		<a class="brand" th:href="@{/}" href="/">
+			<span class="brand__mark">KY</span>
+			<span class="brand__text">KitapYurdu</span>
+		</a>
+
+		<nav class="nav">
+			<a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
+			<a class="nav__link is-active" th:href="@{/katalog}" href="/katalog">Katalog</a>
+			<a class="nav__link" th:href="@{/sepet}" href="/sepet">
+				Sepet
+				<span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+			</a>
+
+			<!--  Profil sadece giriş yapınca -->
+			<a class="nav__link" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+		</nav>
+
+		<div class="topbar__actions">
+
+			<!--  Admin linki: sadece admin role -->
+			<a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">
+				Admin
+			</a>
+
+			<!--  Giriş yoksa: Giriş butonu -->
+			<a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">
+				Giriş
+			</a>
+
+			<!--  Giriş varsa: Çıkış butonu (POST /logout + CSRF) -->
+			<form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<button type="submit" class="btn btn--ghost">Çıkış</button>
+			</form>
+
+			<button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+				<span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+			</button>
+
+		</div>
+	</div>
+</header>
+
+<main class="container" style="padding:16px 0;">
+	<section class="card" style="padding:16px;">
+		<div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+			<div style="width:260px; max-width:100%;">
+				<div th:if="${#lists.isEmpty(images)}" class="card" style="padding:12px; text-align:center;">
+					<img alt="Kapak" src="/images/placeholder-book.png" style="max-width:100%; height:auto;" />
+				</div>
+
+				<div th:if="${!#lists.isEmpty(images)}">
+					<img th:src="@{${images[0].gorselYolu}}"
+						 alt="Kapak"
+						 style="max-width:100%; height:auto; border-radius:12px;" />
+				</div>
+
+				<div th:if="${images.size() > 1}" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+					<a th:each="img : ${images}"
+					   th:href="@{${img.gorselYolu}}"
+					   style="display:inline-block; border:1px solid rgba(0,0,0,.08); border-radius:10px; padding:4px;">
+						<img th:src="@{${img.gorselYolu}}"
+							 alt="Görsel"
+							 style="width:56px; height:56px; object-fit:cover; border-radius:8px;" />
+					</a>
+				</div>
+			</div>
+
+			<div style="flex:1; min-width:280px;">
+				<h1 style="margin:0 0 6px 0;" th:text="${book.title}">Kitap Adı</h1>
+
+				<div style="display:flex; gap:10px; flex-wrap:wrap; opacity:.9; margin-bottom:10px;">
+					<div>
+						<b>Yayınevi:</b>
+						<span th:text="${book.publisherName} ?: '-'">-</span>
+					</div>
+					<div>
+						<b>Sayfa:</b>
+						<span th:text="${book.pageCount} ?: '-'">-</span>
+					</div>
+					<div>
+						<b>Basım:</b>
+						<span th:text="${book.publishYear} ?: '-'">-</span>
+					</div>
+					<div>
+						<b>Stok:</b>
+						<span th:text="${book.stock}">0</span>
+					</div>
+				</div>
+
+				<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0;">
+					<div style="font-size:22px;">
+						<b th:text="${#numbers.formatDecimal(book.price, 1, 'COMMA', 2, 'POINT')}">0,00</b> ₺
+					</div>
+					<div style="opacity:.85;">
+						<span th:text="${book.avgRating}">0.00</span> / 5 •
+						<span th:text="${book.reviewCount}">0</span> yorum
+					</div>
+				</div>
+
+				<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+					<form th:action="@{'/kitap/' + ${book.kitapId} + '/sepete-ekle'}" method="post" style="display:flex; gap:8px; align-items:center;">
+						<input type="number" name="adet" min="1" value="1" style="width:84px;" />
+						<button class="btn btn--secondary" type="submit">Sepete Ekle</button>
+					</form>
+
+					<form th:action="@{'/kitap/' + ${book.kitapId} + '/favori'}" method="post">
+						<button class="btn" type="submit"
+								th:text="${book.favorite} ? 'Favoriden Çıkar' : 'Favoriye Ekle'">
+							Favori
+						</button>
+					</form>
+				</div>
+
+				<div style="margin-top:16px;">
+					<div style="margin-bottom:8px;"><b>Yazar(lar):</b></div>
+					<div th:if="${#lists.isEmpty(authors)}" style="opacity:.8;">-</div>
+					<div th:if="${!#lists.isEmpty(authors)}" style="display:flex; gap:8px; flex-wrap:wrap;">
+						<span class="badge" th:each="a : ${authors}"
+							  th:text="${a.ad} + ' ' + ${a.soyad}">
+							Yazar
+						</span>
+					</div>
+				</div>
+
+				<div style="margin-top:14px;">
+					<div style="margin-bottom:8px;"><b>Kategori(ler):</b></div>
+					<div th:if="${#lists.isEmpty(categories)}" style="opacity:.8;">-</div>
+					<div th:if="${!#lists.isEmpty(categories)}" style="display:flex; gap:8px; flex-wrap:wrap;">
+						<span class="badge" th:each="c : ${categories}"
+							  th:text="${c.ad}">
+							Kategori
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<hr style="margin:18px 0; opacity:.3;" />
+
+		<section>
+			<h2 style="margin:0 0 10px 0; font-size:18px;">Açıklama</h2>
+			<div th:if="${book.description == null or #strings.isEmpty(book.description)}" style="opacity:.8;">
+				Açıklama bulunamadı.
+			</div>
+			<div th:if="${book.description != null and !#strings.isEmpty(book.description)}"
+				 style="white-space:pre-wrap; line-height:1.55;"
+				 th:text="${book.description}">
+				Açıklama...
+			</div>
+		</section>
+
+		<hr style="margin:18px 0; opacity:.3;" />
+
+		<section>
+			<h2 style="margin:0 0 10px 0; font-size:18px;">Yorumlar</h2>
+
+			<div th:if="${#lists.isEmpty(reviews)}" style="opacity:.8;">
+				Henüz yorum yok.
+			</div>
+
+			<div th:if="${!#lists.isEmpty(reviews)}" style="display:flex; flex-direction:column; gap:10px;">
+				<div class="card" style="padding:12px;"
+					 th:each="r : ${reviews}">
+					<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+						<div>
+							<b th:text="${r.kullaniciAdi} ?: (${r.kullaniciAd} + ' ' + ${r.kullaniciSoyad})">kullanici</b>
+							<span style="opacity:.7; margin-left:6px;"
+								  th:text="${r.yorumTarihi}">tarih</span>
+						</div>
+						<div>
+							<b th:text="${r.puan}">5</b>/5
+						</div>
+					</div>
+					<div style="margin-top:8px; white-space:pre-wrap;"
+						 th:text="${r.yorumMetni}">
+						Yorum...
+					</div>
+				</div>
+			</div>
+		</section>
+	</section>
+</main>
+
+</body>
+</html>

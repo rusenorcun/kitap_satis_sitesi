@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <title>Sipariş Tamamla • KitapYurdu</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
+            <a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
+            <a class="nav__link is-active" th:href="@{/sepet}" href="/sepet">
+                Sepet
+                <span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+            </a>
+            <a class="nav__link" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">Admin</a>
+            
+            <a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">Giriş</a>
+
+            <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container" style="margin-top: 30px; margin-bottom: 60px;">
+    
+    <div class="section__head" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h1 class="section__title">Siparişi Tamamla</h1>
+            <p class="section__subtitle">Ödeme ve teslimat bilgilerini girerek alışverişi bitir.</p>
+        </div>
+        <a class="btn btn--secondary btn--sm" th:href="@{/sepet}" href="/sepet">← Sepete Dön</a>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card__header">
+                <h2 class="card__title">Sepet Özeti</h2>
+                <p class="card__desc">Alacağın ürünlerin son kontrolü.</p>
+            </div>
+            
+            <div class="card__body">
+                <div id="items" class="items">
+                    <div class="muted">Yükleniyor...</div>
+                </div>
+
+                <div class="sep"></div>
+
+                <div class="row space"><div class="muted">Ara Toplam</div><div id="araToplam">0,00 ₺</div></div>
+                <div class="row space" style="margin-top:6px"><div class="muted">İndirim</div><div id="indirimToplam">0,00 ₺</div></div>
+                <div class="row space" style="margin-top:6px"><div class="muted">Kargo</div><div id="kargoUcreti">0,00 ₺</div></div>
+                
+                <div class="sep"></div>
+                
+                <div class="row space">
+                    <div style="font-weight:800; font-size:1.1em;">Genel Toplam</div>
+                    <div id="genelToplam" style="font-weight:800; font-size:1.1em; color:var(--secondary);">0,00 ₺</div>
+                </div>
+
+                <div id="cartError" class="alert alert--err" style="display:none; margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <div class="card card--soft">
+            <div class="card__header">
+                <h2 class="card__title">Teslimat & Ödeme</h2>
+                <p class="card__desc">Kargo adresi ve ödeme yöntemi seç.</p>
+            </div>
+
+            <div class="card__body">
+                <div class="field">
+                    <label class="field__label" for="adresSelect">Teslimat Adresi</label>
+                    <div class="select-wrapper">
+                        <select id="adresSelect" class="select">
+                            <option value="">Yükleniyor...</option>
+                        </select>
+                    </div>
+                    <p class="hint">Yeni adres eklemek için profil sayfasına gidebilirsin.</p>
+                </div>
+
+                <div class="field" style="margin-top:20px;">
+                    <label class="field__label" for="odemeSelect">Ödeme Yöntemi</label>
+                    <div class="select-wrapper">
+                        <select id="odemeSelect" class="select">
+                            <option value="">Yükleniyor...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
+                <button id="placeBtn" class="btn btn--secondary btn--block btn--lg" disabled>
+                    Siparişi Onayla
+                </button>
+
+                <div id="placeError" class="alert alert--err" style="display:none; margin-top:15px;"></div>
+                <div id="placeOk" class="alert alert--ok" style="display:none; margin-top:15px;"></div>
+
+                <div class="sep"></div>
+                <div class="muted" style="font-size:0.9em; text-align:center;">
+                    <span class="badge badge--info">Bilgi</span> Siparişiniz onaylandıktan sonra "Siparişlerim" sayfasından takip edebilirsiniz.
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer footer--light">
+    <div class="container footer__inner">
+        <div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+        <div class="muted">Güvenli Ödeme • 256bit SSL</div>
+    </div>
+</footer>
+
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+
+<script>
+    const fmt = (n) => {
+        try { return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n || 0)); }
+        catch(e) { return (n || 0).toString(); }
+    };
+
+    // Element Referansları
+    const elItems = document.getElementById("items");
+    const elAra = document.getElementById("araToplam");
+    const elInd = document.getElementById("indirimToplam");
+    const elKargo = document.getElementById("kargoUcreti");
+    const elGenel = document.getElementById("genelToplam");
+    const elCartErr = document.getElementById("cartError");
+
+    const elAdres = document.getElementById("adresSelect");
+    const elOdeme = document.getElementById("odemeSelect");
+    const elBtn = document.getElementById("placeBtn");
+    const elPlaceErr = document.getElementById("placeError");
+    const elPlaceOk = document.getElementById("placeOk");
+
+    let state = { itemsCount: 0 };
+
+    function setErr(el, msg) { el.style.display = msg ? "block" : "none"; el.textContent = msg || ""; }
+    function setOk(el, msg) { el.style.display = msg ? "block" : "none"; el.textContent = msg || ""; }
+
+    function updateButton() {
+        const adresOk = !!elAdres.value;
+        const odemeOk = !!elOdeme.value;
+        const cartOk = state.itemsCount > 0;
+        
+        // Butonu sadece her şey seçiliyse aktif et
+        elBtn.disabled = !(adresOk && odemeOk && cartOk);
+    }
+
+    // 1. Sepet Özeti
+    async function loadSummary() {
+        setErr(elCartErr, null);
+        elItems.innerHTML = '<div class="muted">Yükleniyor...</div>';
+        try {
+            const res = await fetch("/api/checkout/summary", { headers: { "Accept": "application/json" } });
+            if (!res.ok) throw new Error("Sepet alınamadı");
+            
+            const data = await res.json();
+            const items = data.items || [];
+            const totals = data.totals || {};
+
+            state.itemsCount = items.length;
+
+            if (items.length === 0) {
+                elItems.innerHTML = `<div class="alert alert--warn">Sepetin boş görünüyor.</div>`;
+            } else {
+                elItems.innerHTML = items.map(i => `
+                    <div class="item" style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                        <div>
+                            <div class="item__title" style="font-weight:600;">${i.title || "Ürün"}</div>
+                            <div class="muted" style="font-size:0.9em;">${fmt(i.price)} ₺ x ${i.quantity} adet</div>
+                        </div>
+                        <div style="font-weight:700">${fmt(i.lineTotal)} ₺</div>
+                    </div>
+                `).join("");
+            }
+
+            elAra.textContent = fmt(totals.araToplam) + " ₺";
+            elInd.textContent = fmt(totals.indirimToplam) + " ₺";
+            elKargo.textContent = fmt(totals.kargoUcreti) + " ₺";
+            elGenel.textContent = fmt(totals.genelToplam) + " ₺";
+        } catch(e) {
+            setErr(elCartErr, "Sepet bilgisi yüklenemedi. Sayfayı yenileyin.");
+            elItems.innerHTML = "";
+        }
+        updateButton();
+    }
+
+    // 2. Adresleri Getir
+    async function loadAddresses() {
+        elAdres.innerHTML = `<option value="">Adres yükleniyor...</option>`;
+        try {
+            const res = await fetch("/api/checkout/addresses", { headers: { "Accept": "application/json" } });
+            if (!res.ok) throw new Error("Adres hatası");
+            const list = await res.json();
+            
+            if (!list || list.length === 0) {
+                elAdres.innerHTML = `<option value="">Kayıtlı adres yok (Profil'den ekleyin)</option>`;
+            } else {
+                elAdres.innerHTML = `<option value="">Seçiniz...</option>` + 
+                    list.map(a => `<option value="${a.adresId}">${a.baslik} (${a.ilce}/${a.il})</option>`).join("");
+            }
+        } catch(e) {
+            elAdres.innerHTML = `<option value="">Adres alınamadı</option>`;
+        }
+        updateButton();
+    }
+
+    // 3. Ödeme Yöntemlerini Getir
+    async function loadPaymentMethods() {
+        elOdeme.innerHTML = `<option value="">Yükleniyor...</option>`;
+        try {
+            const res = await fetch("/api/checkout/payment-methods", { headers: { "Accept": "application/json" } });
+            if (!res.ok) throw new Error("Ödeme yöntemi hatası");
+            const list = await res.json();
+            
+            elOdeme.innerHTML = `<option value="">Seçiniz...</option>` + 
+                list.map(y => `<option value="${y}">${y}</option>`).join("");
+        } catch(e) {
+            elOdeme.innerHTML = `<option value="KapidaOdeme">Kapıda Ödeme (Yedek)</option>`;
+        }
+        updateButton();
+    }
+
+    // Olay Dinleyicileri
+    elAdres.addEventListener("change", updateButton);
+    elOdeme.addEventListener("change", updateButton);
+
+    // Sipariş Verme Butonu
+    elBtn.addEventListener("click", async () => {
+        setErr(elPlaceErr, null);
+        setOk(elPlaceOk, null);
+
+        const adresId = elAdres.value;
+        const odemeYontemi = elOdeme.value;
+
+        if (!adresId || !odemeYontemi) {
+            alert("Lütfen adres ve ödeme yöntemi seçin.");
+            return;
+        }
+
+        // CSRF Token Okuma
+        const csrfMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+        
+        if(!csrfMeta || !csrfHeaderMeta) {
+            setErr(elPlaceErr, "Güvenlik token'ı bulunamadı. Sayfayı yenileyin.");
+            return;
+        }
+
+        const csrfToken = csrfMeta.getAttribute('content');
+        const csrfHeader = csrfHeaderMeta.getAttribute('content');
+
+        // Butonu Kilitle
+        elBtn.disabled = true;
+        elBtn.textContent = "İşleniyor...";
+
+        try {
+            const res = await fetch("/api/checkout/place", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "Accept": "application/json",
+                    [csrfHeader]: csrfToken 
+                },
+                body: JSON.stringify({ adresId: Number(adresId), odemeYontemi })
+            });
+
+            // JSON Parse
+            let data = {};
+            try { data = await res.json(); } catch(e) {}
+
+            if (!res.ok) {
+                setErr(elPlaceErr, data.hata || "Sipariş oluşturulamadı. Lütfen tekrar deneyin.");
+                elBtn.disabled = false;
+                elBtn.textContent = "Siparişi Onayla";
+            } else {
+                setOk(elPlaceOk, `Siparişiniz başarıyla alındı! Sipariş No: #${data.siparisId}`);
+                elBtn.textContent = "Tamamlandı";
+                
+                // Başarılı olunca sepeti güncelle (boş görünecek)
+                await loadSummary();
+                
+                // 2 saniye sonra ana sayfaya yönlendir (Opsiyonel)
+                setTimeout(() => { window.location.href = "/profil"; }, 2000);
+            }
+        } catch (e) {
+            setErr(elPlaceErr, "Bağlantı hatası oluştu.");
+            elBtn.disabled = false;
+            elBtn.textContent = "Siparişi Onayla";
+        }
+    });
+
+    // Sayfa Yüklendiğinde Başlat
+    (async function init() {
+        await Promise.all([loadSummary(), loadAddresses(), loadPaymentMethods()]);
+    })();
+</script>
+
+</body>
+</html>

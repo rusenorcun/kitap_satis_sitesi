@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Admin Panel • KitapYurdu</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body>
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link" th:href="@{/admin}" href="/admin">Admin Ana Sayfa</a>
+            <a class="nav__link is-active" th:href="@{/admin/panel}" href="/admin/panel">Admin Panel</a>
+            <a class="nav__link" th:href="@{/admin/siparisler}" href="/admin/siparisler">Siparişler</a>
+            <a class="nav__link" th:href="@{/admin/kitap}" href="/admin/kitap">Kitap</a>
+            <a class="nav__link" th:href="@{/admin/yayinevi}" href="/admin/yayinevi">Yayınevi</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <form th:action="@{/logout}" method="post" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container admin">
+	<!-- Başlık + mesaj -->
+	<section class="admin__head">
+		<div>
+			<h1 class="admin__title">Yönetim Paneli</h1>
+			<p class="admin__subtitle">
+				Admin Paneline hoş geldiniz. Buradan sistem yönetimi işlemlerini gerçekleştirebilirsiniz.
+			</p>
+		</div>
+
+		<div class="admin__headActions">
+			<a class="btn btn--secondary" th:href="@{/admin/kitap}" href="/admin/kitap">Kitap Yönetimi</a>
+			<a class="btn btn--secondary" th:href="@{/admin/yayinevi}" href="/admin/yayinevi">Yayınevi Yönetimi</a>
+		</div>
+	</section>
+
+	<!-- KPI Kartları -->
+	<section class="kpi">
+		<article class="kpi__card">
+			<div class="kpi__label">Toplam Stok</div>
+			<div class="kpi__value" th:text="${toplamStok != null ? toplamStok : '-'}">-</div>
+			<div class="kpi__hint">Tüm yayınevleri toplamı</div>
+		</article>
+
+		<article class="kpi__card">
+			<div class="kpi__label">Toplam Kitap</div>
+			<div class="kpi__value" th:text="${toplamKitap != null ? toplamKitap : '-'}">-</div>
+			<div class="kpi__hint">Sistemdeki tüm kitaplar</div>
+		</article>
+
+		<article class="kpi__card">
+			<div class="kpi__label">Yayınevi</div>
+			<div class="kpi__value" th:text="${yayineviSayisi != null ? yayineviSayisi : '-'}">-</div>
+			<div class="kpi__hint">Aktif yayınevi sayısı</div>
+		</article>
+
+		<article class="kpi__card">
+			<div class="kpi__label">Bekleyen İş</div>
+			<div class="kpi__value" th:text="${bekleyenIs != null ? bekleyenIs : '-'}">-</div>
+			<div class="kpi__hint">Opsiyonel: onay, denetim vb.</div>
+		</article>
+	</section>
+
+	<section class="admin__grid">
+
+		<!-- SOL: Roller -->
+		<section class="card">
+			<div class="card__header">
+				<h2 class="card__title">Kullanıcı Rolleri</h2>
+				<p class="card__desc">Kullanıcılara rol atama / kaldırma.</p>
+			</div>
+
+			<div class="card__body">
+				<!-- Rol verme -->
+				<form class="formGrid" th:action="@{/admin/users/role/set}" method="post">
+					<label class="field">
+						<span class="field__label">Kullanıcı Adı / Email</span>
+						<input class="input" name="username" type="text" placeholder="örn: orcun@." required />
+					</label>
+				
+					<label class="field">
+						<span class="field__label">Rol</span>
+						<select class="input" name="role" required>
+							<option value="" selected disabled>Rol seç</option>
+							<option value="ADMIN">ADMIN</option>
+							<option value="USER">USER</option>
+						</select>
+					</label>
+					<button class="btn btn--secondary btn--block" type="submit">Rol Güncelle</button>
+				</form>
+			</div>
+            <div class="divider"></div>
+                
+			<div class="card__header">
+				<h2 class="card__title">Kullanıcı Listesi</h2>
+			</div>
+                
+        <div class="tableWrap">
+            <table class="table table--fit">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kullanıcı</th>
+                        <th>Roller</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users}">
+                    <td th:text="${u.userId}">1</td>
+                    <td th:text="${u.username}">user</td>
+                    <td th:text="${u.roles}">ROLE_USER</td>
+                    <td>
+                    <span class="badge" th:classappend="${u.enabled} ? ' badge--ok' : ' badge--muted'"
+                        th:text="${u.enabled} ? 'Aktif' : 'Pasif'">Aktif</span>
+                    </td>
+                    </tr>
+                    <tr th:if="${users == null || #lists.isEmpty(users)}">
+                    <td colspan="4" class="empty">Kullanıcı bulunamadı .</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+		
+		</section>
+
+		<!-- SAĞ: Hızlı İşlemler -->
+		<section class="card">
+			<div class="card__header">
+				<h2 class="card__title">Hızlı İşlemler</h2>
+				<p class="card__desc">Sık kullanılan yönetim aksiyonları.</p>
+			</div>
+
+			<div class="card__body">
+				<div class="quick2">
+					<!-- Yayınevi ekle -->
+					<form class="miniAction" th:action="@{/admin/yayinevi/save}" method="post">
+						<div class="miniAction__head">
+							<div class="miniAction__icon">🏢</div>
+							<div>
+								<div class="miniAction__title">Yayınevi Ekle</div>
+								<div class="miniAction__sub">Ad ve isteğe bağlı açıklama</div>
+							</div>
+						</div>
+
+						<input class="input" name="ad" type="text" placeholder="Yayınevi adı" required />
+						<input class="input" name="aciklama" type="text" placeholder="Açıklama (opsiyonel)" />
+						<button class="btn btn--secondary btn--block" type="submit">Ekle</button>
+					</form>
+
+					<!-- Yayınevi sil -->
+					<form class="miniAction" th:action="@{/admin/yayinevi/delete}" method="post">
+						<div class="miniAction__head">
+							<div class="miniAction__icon">🗑️</div>
+							<div>
+								<div class="miniAction__title">Yayınevi Sil</div>
+								<div class="miniAction__sub">Id ile silme (güvenli)</div>
+							</div>
+						</div>
+
+						<input class="input" name="yayineviId" type="number" placeholder="Yayınevi Id" required />
+						<button class="btn btn--secondary btn--block" type="submit">Sil</button>
+						<p class="miniAction__warn">Not: Bu İşlem Geri Alınamaz!</p>
+					</form>
+
+					<!-- Kitap ekle -->
+					<form class="miniAction" th:action="@{/admin/kitap}" method="get">
+						<div class="miniAction__head">
+							<div class="miniAction__icon">📚</div>
+							<div>
+								<div class="miniAction__title">Kitap Ekle / Güncelle</div>
+								<div class="miniAction__sub">Kitap form ekranına git</div>
+							</div>
+						</div>
+
+						<button class="btn btn--secondary btn--block" type="submit">Kitap Formuna Git</button>
+					</form>
+
+					<!-- Kitap sil (Id ile) -->
+					<form class="miniAction" th:action="@{/admin/kitap/delete}" method="post">
+						<div class="miniAction__head">
+							<div class="miniAction__icon">❌</div>
+							<div>
+								<div class="miniAction__title">Kitap Sil</div>
+								<div class="miniAction__sub">KitapId ile sil</div>
+							</div>
+						</div>
+
+						<input class="input" name="kitapId" type="number" placeholder="KitapId" required />
+						<button class="btn btn--secondary btn--block" type="submit">Sil</button>
+						<p class="miniAction__warn">Not: Bu İşlem Geri Alınamaz!</p>
+					</form>
+				</div>
+			</div>
+		</section>
+
+		<!-- ALT: Stoklar -->
+		<section class="card admin__wide">
+			<div class="card__header">
+				<h2 class="card__title">Stok Yönetimi</h2>
+				<p class="card__desc">
+					Tüm stoklar + yayınevi bazlı stoklar. Düzenlemek için satırdan güncelle.
+				</p>
+			</div>
+
+			<div class="card__body">
+				<!-- Filtre -->
+				<form class="toolbar" th:action="@{/admin}" method="get">
+					<div class="toolbar__left">
+						<label class="field field--inline">
+							<span class="field__label">Yayınevi</span>
+							<select class="input" name="yayineviId">
+								<option value="">Hepsi</option>
+								<option th:each="y : ${yayinevleri}"
+												th:value="${y.id}"
+												th:text="${y.ad}"
+												th:selected="${seciliYayineviId != null and seciliYayineviId == y.id}">
+									Yayınevi
+								</option>
+							</select>
+						</label>
+
+						<label class="field field--inline">
+							<span class="field__label">Ara</span>
+							<input class="input" name="q" type="text" placeholder="Kitap adı..." th:value="${q}" />
+						</label>
+					</div>
+
+					<div class="toolbar__right">
+						<button class="btn btn--secondary" type="submit">Filtrele</button>
+						<a class="btn btn--ghost" th:href="@{/admin}" href="/admin">Sıfırla</a>
+					</div>
+				</form>
+
+				<!-- Tablo -->
+				<div class="tableWrap">
+					<table class="table">
+						<thead>
+						<tr>
+							<th>KitapId</th>
+							<th>Kitap Adı</th>
+							<th>Yayınevi</th>
+							<th class="t-right">Fiyat</th>
+							<th class="t-right">Stok</th>
+							<th>Durum</th>
+							<th class="t-right">İşlem</th>
+						</tr>
+						</thead>
+
+						<tbody>
+						<tr th:each="r : ${stokRows}">
+							<td th:text="${r.kitapId}">1</td>
+							<td>
+								<div class="titleCell">
+									<div class="titleCell__main" th:text="${r.kitapAdi}">Kitap</div>
+									<div class="titleCell__sub muted" th:text="${r.isbn}">ISBN</div>
+								</div>
+							</td>
+							<td th:text="${r.yayineviAdi}">Yayınevi</td>
+							<td class="t-right" th:text="${r.fiyat}">0</td>
+
+							<!-- stok ve durum güncelleme -->
+							<td class="t-right">
+								<form class="inlineForm" th:action="@{/admin/stok/update}" method="post">
+									<input type="hidden" name="kitapId" th:value="${r.kitapId}" />
+									<input class="input input--sm t-right" name="stok" type="number" min="0" th:value="${r.stok}" />
+									<select class="input input--sm" name="durum">
+										<option th:value="true"  th:selected="${r.durum}">Aktif</option>
+										<option th:value="false" th:selected="${!r.durum}">Pasif</option>
+									</select>
+									<button class="btn btn--secondary btn--sm" type="submit">Kaydet</button>
+								</form>
+							</td>
+
+							<td>
+								<span class="titleCell" th:classappend="${r.durum} ? ' badge--ok' : ' badge--muted'"
+											th:text="${r.durum} ? 'Aktif' : 'Pasif'">Aktif</span>
+							</td>
+
+							<td class="t-right">
+								<div class="rowActions">
+									<a class="btn btn--ghost btn--sm" th:href="@{/admin/kitap(editId=${r.kitapId})}" href="#">Düzenle</a>
+									<form th:action="@{/admin/kitap/delete}" method="post" class="inline">
+										<input type="hidden" name="kitapId" th:value="${r.kitapId}" />
+										<button class="btn btn--secondary btn--sm" type="submit">Sil</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<!-- boş durum -->
+						<tr th:if="${stokRows == null || #lists.isEmpty(stokRows)}">
+							<td colspan="7" class="empty">
+								Sonuç bulunamadı.
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+				</p>
+			</div>
+		</section>
+
+	</section>
+</main>
+
+<footer class="footer">
+	<div class="container footer__inner">
+		<div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+		<div class="muted">Admin Panel</div>
+	</div>
+</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+
+</body>
+</html>

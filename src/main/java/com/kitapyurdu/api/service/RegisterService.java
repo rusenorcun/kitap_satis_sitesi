@@ -1,0 +1,51 @@
+package com.kitapyurdu.api.service;
+
+import com.kitapyurdu.api.auth.RegisterRequest;
+import com.kitapyurdu.api.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RegisterService {
+
+	private final UserRepository users;
+	private final PasswordEncoder encoder;
+
+	public RegisterService(UserRepository users, PasswordEncoder encoder) {
+		this.users = users;
+		this.encoder = encoder;
+	}
+
+	public void register(RegisterRequest r) {
+		String username = safe(r.getUsername());
+		String email = safe(r.getEmail());
+		String ad = safe(r.getAd());
+		String soyad = safe(r.getSoyad());
+		String telefon = (r.getTelefon() == null || r.getTelefon().isBlank()) ? null : r.getTelefon().trim();
+
+		if (username.isBlank()) throw new IllegalArgumentException("Kullanıcı adı zorunlu.");
+		if (email.isBlank()) throw new IllegalArgumentException("E-posta zorunlu.");
+		if (ad.isBlank()) throw new IllegalArgumentException("Ad zorunlu.");
+		if (soyad.isBlank()) throw new IllegalArgumentException("Soyad zorunlu.");
+
+		if (r.getPassword() == null || r.getPassword2().length() < 6)
+			throw new IllegalArgumentException("Şifre en az 6 karakter olmalı.");
+		if (!r.getPassword().equals(r.getPassword2()))
+			throw new IllegalArgumentException("Şifreler eşleşmiyor.");
+
+		if (users.existsByKullaniciAdi(username))
+			throw new IllegalArgumentException("Bu kullanıcı adı zaten kullanılıyor.");
+		if (users.existsByEposta(email))
+			throw new IllegalArgumentException("Bu e-posta zaten kullanılıyor.");
+
+		String hash = encoder.encode(r.getPassword());
+
+		//Parametre sırası repository imzasıyla aynı
+		users.insertUser(username, email, hash, ad, soyad, telefon);
+
+	}
+
+	private static String safe(String s) {
+		return s == null ? "" : s.trim();
+	}
+}

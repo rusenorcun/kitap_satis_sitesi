@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yayınevi Yönetimi • KitapYurdu</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body>
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link" th:href="@{/admin}" href="/admin">Admin Ana Sayfa</a>
+            <a class="nav__link" th:href="@{/admin/panel}" href="/admin/panel">Admin Panel</a>
+            <a class="nav__link" th:href="@{/admin/kitap}" href="/admin/kitap">Kitap</a>
+            <a class="nav__link is-active" th:href="@{/admin/yayinevi}" href="/admin/yayinevi">Yayınevi</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <form th:action="@{/logout}" method="post" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container admin">
+    <section class="admin__head">
+        <div>
+            <h1 class="admin__title">Yayınevi Yönetimi</h1>
+            <p class="admin__subtitle">Yayınevi ekle • güncelle • listele • (kitap yoksa) sil</p>
+        </div>
+
+        <div class="admin__headActions">
+            <a class="btn btn--secondary" th:href="@{/admin}" href="/admin">Admin Panel</a>
+            <a class="btn btn--ghost" th:href="@{/admin/yayinevi/new}" href="/admin/yayinevi/new">Yeni Yayınevi</a>
+        </div>
+    </section>
+
+    <section class="admin__grid">
+
+        <section class="card">
+            <div class="card__header">
+                <h2 class="card__title">Yayınevleri</h2>
+                <p class="card__desc">Ara, seç ve düzenle. Bağlı kitap varsa silme yapılamaz.</p>
+            </div>
+
+            <div class="card__body">
+                <form class="toolbar" th:action="@{/admin/yayinevi}" method="get">
+                    <div class="toolbar__left">
+                        <label class="field field--inline">
+                            <span class="field__label">Ara</span>
+                            <input class="input" name="q" type="text" placeholder="Yayınevi adı..." th:value="${q}" />
+                        </label>
+                    </div>
+
+                    <div class="toolbar__right">
+                        <button class="btn btn--secondary" type="submit">Filtrele</button>
+                        <a class="btn btn--ghost" th:href="@{/admin/yayinevi}" href="/admin/yayinevi">Sıfırla</a>
+                    </div>
+                </form>
+
+                <div class="tableWrap">
+                    <table class="table table--fit table--hover">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Yayınevi</th>
+                            <th class="t-right">Kitap</th>
+                            <th class="t-right">İşlem</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="y : ${yayinevleri}">
+                            <td th:text="${y.yayineviId}">1</td>
+                            <td>
+                                <div class="titleCell">
+                                    <div class="titleCell__main" th:text="${y.ad}">Yayınevi</div>
+                                    <div class="titleCell__sub muted" th:text="${y.aciklama != null ? y.aciklama : '-'}">Açıklama</div>
+                                </div>
+                            </td>
+                            <td class="t-right">
+                                <span class="action" th:classappend="${y.kitapSayisi == 0}"
+                                    th:text="${y.kitapSayisi}">0</span>
+                            </td>
+                            <td class="t-right">	
+                                <div class="rowActions">
+                                    <a class="btn btn--ghost btn--sm"
+                                    th:href="@{/admin/yayinevi(editId=${y.yayineviId}, q=${q})}">Düzenle</a>
+
+                                    <form th:action="@{/admin/yayinevi/delete}" method="post" class="inline">
+                                        <input type="hidden" name="yayineviId" th:value="${y.yayineviId}" />
+                                        <button class="btn btn--secondary btn--sm" type="submit"
+                                                th:disabled="${y.kitapSayisi > 0}">
+                                            Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr th:if="${yayinevleri == null || #lists.isEmpty(yayinevleri)}">
+                            <td colspan="4" class="empty">Sonuç bulunamadı.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<p class="hint">
+                        Not: Bu sayfada kitap sayısı gösterilir. Silme sadece kitap sayısı 0 ise mümkündür.
+                    </p>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card__header">
+                <h2 class="card__title"
+                    th:text="${form.yayineviId != null ? 'Yayınevi Güncelle (ID: ' + form.yayineviId + ')' : 'Yeni Yayınevi'}">
+                    Yeni Yayınevi
+                </h2>
+                <p class="card__desc">Ekleme SP ile, güncelleme stabil UPDATE ile yapılır.</p>
+            </div>
+
+            <div class="card__body">
+                <form class="formGrid" th:action="@{/admin/yayinevi/save}" method="post">
+                    <input type="hidden" name="yayineviId" th:value="${form.yayineviId}" />
+
+                    <label class="field">
+                        <span class="field__label">Yayınevi Adı</span>
+                        <input class="input" name="ad" type="text" required th:value="${form.ad}" />
+                    </label>
+
+                    <label class="field">
+                        <span class="field__label">Açıklama (opsiyonel)</span>
+                        <textarea class="input" name="aciklama" rows="5" th:text="${form.aciklama}"></textarea>
+                    </label>
+
+                    <button class="btn btn--secondary btn--block" type="submit">
+                        Kaydet
+                    </button>
+
+                    
+                </form>
+            </div>
+        </section>
+
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container footer__inner">
+        <div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+        <div class="muted">Admin • Yayınevi Yönetimi</div>
+    </div>
+</footer>
+
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+
+</body>
+</html>

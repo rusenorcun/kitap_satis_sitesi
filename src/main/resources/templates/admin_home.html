@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Admin Ana Sayfa • KitapYurdu</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body>
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link is-active" th:href="@{/admin}" href="/admin">Admin Ana Sayfa</a>
+            <a class="nav__link" th:href="@{/admin/panel}" href="/admin/panel">Admin Panel</a>
+            <a class="nav__link" th:href="@{/admin/siparisler}" href="/admin/siparisler">Siparişler</a>
+            <a class="nav__link" th:href="@{/admin/kitap}" href="/admin/kitap">Kitap</a>
+            <a class="nav__link" th:href="@{/admin/yayinevi}" href="/admin/yayinevi">Yayınevi</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <form th:action="@{/logout}" method="post" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container admin">
+	<section class="admin__head">
+		<div>
+			<h1 class="admin__title">Admin Ana Sayfa</h1>
+			<p class="admin__subtitle">Sistem durumu, kısa yollar ve yönetim akışı.</p>
+		</div>
+
+		<div class="admin__headActions">
+			<a class="btn btn--secondary" th:href="@{/admin/panel}" href="/admin/panel">Admin Panel’e Git</a>
+		</div>
+	</section>
+
+	<!-- Toast.js ile bildirim gönderimi -->
+	<div class="alert" data-toast="1"
+			 th:if="${param.mesaj != null}"
+			 th:text="${param.mesaj[0]}"></div>
+
+	<!-- Özet kartlar -->
+	<section class="admin__grid">
+		<section class="card">
+			<div class="card__header">
+				<h2 class="card__title">Sistem Özeti</h2>
+				<p class="card__desc">Veri tabanı canlı, admin modülleri erişilebilir.</p>
+			</div>
+			<div class="card__body">
+				<div class="stats">
+					<div class="stat">
+						<div class="stat__label">Toplam Kitap</div>
+						<div class="stat__value" th:text="${toplamKitap}">0</div>
+					</div>
+					<div class="stat">
+						<div class="stat__label">Aktif Kitap</div>
+						<div class="stat__value" th:text="${aktifKitap}">0</div>
+					</div>
+					<div class="stat">
+						<div class="stat__label">Toplam Stok</div>
+						<div class="stat__value" th:text="${toplamStok}">0</div>
+					</div>
+					<div class="stat">
+						<div class="stat__label">Yayınevi</div>
+						<div class="stat__value" th:text="${yayineviSayisi}">0</div>
+					</div>
+					<div class="stat">
+						<div class="stat__label">Bekleyen İş</div>
+						<div class="stat__value" th:text="${bekleyenIs}">0</div>
+					</div>
+				</div>
+
+		</section>
+
+		<section class="card">
+	<div class="card__header">
+		<h2 class="card__title">Operasyon Görünümü</h2>
+		<p class="card__desc">Düşük stok ve temizlik ihtiyaçları. Öncelik sırasıyla aksiyon al.</p>
+	</div>
+
+	<div class="card__body">
+		<div class="stats" style="margin-bottom:12px;">
+			<div class="stat">
+				<div class="stat__label">Pasif Kitap</div>
+				<div class="stat__value" th:text="${pasifKitapSayisi}">0</div>
+			</div>
+			<div class="stat">
+				<div class="stat__label">Düşük Stok Eşiği</div>
+				<div class="stat__value">≤ 5</div>
+			</div>
+		</div>
+
+		<div class="muted" style="margin-bottom:8px;">Düşük Stokta Olanlar</div>
+		<div class="tableWrap">
+			<table class="table table--fit">
+				<thead>
+				<tr>
+					<th>ID</th>
+					<th>Kitap</th>
+					<th class="t-right">Stok</th>
+					<th class="t-right">İşlem</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="r : ${lowStock}">
+					<td th:text="${r.kitapId}">1</td>
+					<td>
+						<div class="titleCell">
+							<div class="titleCell__main" th:text="${r.kitapAdi}">Kitap</div>
+							<div class="titleCell__sub muted" th:text="${r.yayineviAdi != null ? r.yayineviAdi : '-'}">Yayınevi</div>
+						</div>
+					</td>
+					<td class="t-right">
+						<span class="badge badge--warn" th:text="${r.stok}">0</span>
+					</td>
+					<td class="t-right">
+						<a class="btn btn--ghost btn--sm"
+							 th:href="@{/admin/panel(q=${r.kitapAdi})}"
+							 href="/admin/panel">Panelde Aç</a>
+					</td>
+				</tr>
+
+				<tr th:if="${lowStock == null || #lists.isEmpty(lowStock)}">
+					<td colspan="4" class="empty">Düşük stokta kitap yok.</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<p class="hint">
+			“Panelde Aç” ile stok satırına hızlı ulaşabilirsin.
+		</p>
+	</div>
+</section>
+
+<section class="card">
+	<div class="card__header">
+		<h2 class="card__title">Temizlik & Düzen</h2>
+		<p class="card__desc">Kitabı olmayan yayınevleri. İstersen kaldır, istersen sonra kullan.</p>
+	</div>
+
+	<div class="card__body">
+		<div class="muted" style="margin-bottom:8px;">Boş Yayınevleri (Kitap=0)</div>
+
+		<div class="tableWrap">
+			<table class="table table--fit">
+				<thead>
+				<tr>
+					<th>ID</th>
+					<th>Yayınevi</th>
+					<th class="t-right">İşlem</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="y : ${emptyPublishers}">
+					<td th:text="${y.yayineviId}">1</td>
+					<td th:text="${y.ad}">Yayınevi</td>
+					<td class="t-right">
+						<a class="btn btn--ghost btn--sm"
+							th:href="@{/admin/yayinevi(editId=${y.yayineviId})}"
+							href="/admin/yayinevi">Yayınevinde Aç</a>
+					</td>
+				</tr>
+
+				<tr th:if="${emptyPublishers == null || #lists.isEmpty(emptyPublishers)}">
+					<td colspan="3" class="empty">Boş yayınevi yok.</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+</section>
+
+
+	<!-- Sistem işleyişi / notlar -->
+	<section class="card admin__wide" style="margin-top:16px;">
+		<div class="card__header">
+			<h2 class="card__title">Sistem İşleyişi</h2>
+			<p class="card__desc">Admin panelin çalışma prensipleri ve kurallar.</p>
+		</div>
+		<div class="card__body">
+			<ul class="bullets">
+				<li><b>Veritabanı:</b> Veri Tabanı İşlemleri Otomatik Gerçekleşir </li>
+				<li><b>Kitap işlemleri:</b> Kitap Ekleme/Güncelleme işlemleri.</li>
+				<li><b>Yayınevi işlemleri:</b> Kitap bağlıysa engellenecek şekilde Yayınevi İşlemleri.</li>
+				<li><b>Mesaj sistemi:</b> Tüm bilgilendirmeler sağ üstte toast olarak görünür.</li>
+				<li><b>Gezinme:</b> Üst bar ile admin modülleri arasında serbest dolaşım.</li>
+			</ul>
+		</div>
+	</section>
+</main>
+
+<footer class="footer">
+	<div class="container footer__inner">
+		<div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+		<div class="muted">Admin • Ana Sayfa</div>
+	</div>
+</footer>
+
+<!-- global UX -->
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+
+
+</body>
+</html>

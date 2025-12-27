@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="tr"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>KitapYurdu • Ana Sayfa</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+<header class="topbar">
+	<div class="container topbar__inner">
+		<a class="brand" th:href="@{/}" href="/">
+			<span class="brand__mark">KY</span>
+			<span class="brand__text">KitapYurdu</span>
+		</a>
+
+		<nav class="nav">
+			<a class="nav__link is-active" th:href="@{/}" href="/">Ana Sayfa</a>
+			<a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
+			<a class="nav__link" th:href="@{/sepet}" href="/sepet">
+				Sepet
+				<span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+			</a>
+
+			<!--  Profil sadece giriş yapınca -->
+			<a class="nav__link" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+		</nav>
+
+		<div class="topbar__actions">
+
+			<!--  Admin linki: sadece admin role -->
+			<a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">
+				Admin
+			</a>
+
+			<!--  Giriş yoksa: Giriş butonu -->
+			<a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">
+				Giriş
+			</a>
+
+			<!--  Giriş varsa: Çıkış butonu (POST /logout + CSRF) -->
+			<form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<button type="submit" class="btn btn--ghost">Çıkış</button>
+			</form>
+
+			<button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+				<span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+			</button>
+
+		</div>
+	</div>
+</header>
+
+<main class="container">
+	<!-- HERO -->
+	<section class="hero hero--light">
+		<div class="hero__content">
+			<h1 class="hero__title">Kitabını seç, sepete ekle, güvenle satın al.</h1>
+			<p class="hero__subtitle">
+				Yeni çıkanlar, az kalanlar ve öne çıkanlar tek bir yerde. Hızlı arama ile kataloğa geç.
+			</p>
+
+			<div class="hero__cta">
+				<a class="btn btn--secondary" th:href="@{/katalog}" href="/katalog">Kataloğa Git</a>
+				<a class="btn btn--secondary" th:href="@{/sepet}" href="/sepet">Sepeti Gör</a>
+			</div>
+
+			<div class="hero__stats">
+				<div class="stat">
+					<div class="stat__value" th:text="${toplamKitapSayisi != null ? toplamKitapSayisi : '-'}">-</div>
+					<div class="stat__label">Toplam Kitap</div>
+				</div>
+				<div class="stat">
+					<div class="stat__value" th:text="${aktifKitapSayisi != null ? aktifKitapSayisi : '-'}">-</div>
+					<div class="stat__label">Listede</div>
+				</div>
+				<div class="stat">
+					<div class="stat__value" th:text="${yayineviSayisi != null ? yayineviSayisi : '-'}">-</div>
+					<div class="stat__label">Yayınevi</div>
+				</div>
+			</div>
+
+			<div class="trust">
+				<div class="trust__item"><span class="trust__icon">🚚</span> Hızlı kargo</div>
+				<div class="trust__item"><span class="trust__icon">↩️</span> Kolay iade</div>
+				<div class="trust__item"><span class="trust__icon">🔒</span> Güvenli ödeme</div>
+				<div class="trust__item"><span class="trust__icon">💬</span> Yorum & puan</div>
+			</div>
+		</div>
+
+		<div class="hero__panel">
+			<div class="card card--soft">
+				<div class="card__header">
+					<h2 class="card__title">Hızlı Arama</h2>
+					<p class="card__desc">Kitap adını yaz, kataloğa geç.</p>
+				</div>
+
+				<form class="search" th:action="@{/katalog}" method="get">
+					<label class="field">
+						<span class="field__label">Arama</span>
+						<input class="input" name="q" type="text" placeholder="Örn: Simyacı, Sefiller..." />
+					</label>
+
+					<button class="btn btn--secondary btn--block" type="submit">Ara</button>
+
+					<p class="hint">Katalog sayfasında filtreleme ve sayfalama ekleyeceğiz.</p>
+				</form>
+			</div>
+
+			<div class="card">
+				<div class="card__header">
+					<h2 class="card__title">Bugün Ne Okusam?</h2>
+					<p class="card__desc">Öne çıkanlardan hızlı seçim.</p>
+				</div>
+
+				<div class="card__body">
+					<div class="miniList">
+						<a class="miniItem" th:each="b,st : ${featured}" th:if="${st.index < 4}"
+						   th:href="@{/kitap/{id}(id=${b.kitapId})}" href="/kitap/1">
+							<span class="miniItem__title" th:text="${b.kitapAdi}">Kitap</span>
+							<span class="miniItem__meta">
+								<span th:text="${b.yayineviAdi != null ? b.yayineviAdi : '-'}">-</span>
+								• <span th:text="${b.fiyat != null ? b.fiyat : '-'}">-</span> ₺
+							</span>
+						</a>
+
+						<div class="empty muted" th:if="${featured == null || #lists.isEmpty(featured)}">
+							Henüz listelenecek kitap yok.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- LIMITED STOCK -->
+	<section class="section">
+		<div class="section__head">
+			<h2 class="section__title">Stokta Sınırlı Kalanlar</h2>
+			<p class="section__subtitle">Tükenecek ürünleri kaçırma (stok ≤ 5).</p>
+		</div>
+
+		<div class="productGrid">
+			<article class="productCard" th:each="b : ${limited}">
+				<a class="productCard__img" th:href="@{/kitap/{id}(id=${b.kitapId})}" href="/kitap/1" aria-label="Kitap detayı">
+					<div class="imgPh">📘</div>
+					<span class="badge badge--warn">Az kaldı</span>
+				</a>
+
+				<div class="productCard__body">
+					<div class="productCard__title" th:text="${b.kitapAdi}">Kitap Adı</div>
+					<div class="productCard__meta">
+						<span th:text="${b.yayineviAdi != null ? b.yayineviAdi : '-'}">Yayınevi</span>
+						<span class="dot">•</span>
+						<span>Stok: <b th:text="${b.stok}">3</b></span>
+					</div>
+
+					<div class="productCard__foot">
+						<div class="price">
+							<span class="price__value" th:text="${b.fiyat != null ? b.fiyat : '-'}">0</span>
+							<span class="price__cur">₺</span>
+						</div>
+						<a class="btn btn--secondary btn--sm" th:href="@{/sepet/add(kitapId=${b.kitapId})}" href="/sepet/add?kitapId=1">
+							Sepete Ekle
+						</a>
+					</div>
+				</div>
+			</article>
+
+			<div class="empty muted" th:if="${limited == null || #lists.isEmpty(limited)}">
+				Şu an “az kalan” ürün yok.
+			</div>
+		</div>
+	</section>
+
+	<!-- FEATURED -->
+	<section class="section">
+		<div class="section__head">
+			<h2 class="section__title">Öne Çıkanlar</h2>
+			<p class="section__subtitle">Yeni eklenenlerden seçtiklerimiz.</p>
+		</div>
+
+		<div class="productGrid">
+			<article class="productCard" th:each="b : ${featured}">
+				<a class="productCard__img" th:href="@{/kitap/{id}(id=${b.kitapId})}" href="/kitap/1">
+					<div class="imgPh">📗</div>
+					<span class="badge badge--info">Yeni</span>
+				</a>
+
+				<div class="productCard__body">
+					<div class="productCard__title" th:text="${b.kitapAdi}">Kitap Adı</div>
+					<div class="productCard__meta">
+						<span th:text="${b.yayineviAdi != null ? b.yayineviAdi : '-'}">Yayınevi</span>
+						<span class="dot">•</span>
+						<span th:text="${b.kategoriler != null ? b.kategoriler : 'Kategori'}">Kategori</span>
+					</div>
+
+					<div class="productCard__foot">
+						<div class="price">
+							<span class="price__value" th:text="${b.fiyat != null ? b.fiyat : '-'}">0</span>
+							<span class="price__cur">₺</span>
+						</div>
+
+						<a class="btn btn--secondary btn--sm" th:href="@{/kitap/{id}(id=${b.kitapId})}" href="/kitap/1">
+							Detay
+						</a>
+					</div>
+				</div>
+			</article>
+
+			<div class="empty muted" th:if="${featured == null || #lists.isEmpty(featured)}">
+				Henüz öne çıkan ürün yok.
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA -->
+	<section class="banner">
+		<div class="banner__inner">
+			<div>
+				<h3 class="banner__title">Tüm kitapları keşfet</h3>
+				<p class="banner__text">Filtrele, ara, karşılaştır. Satın alma akışını sırayla kuracağız.</p>
+			</div>
+			<a class="btn btn--secondary" th:href="@{/katalog}" href="/katalog">Kataloğa Git</a>
+		</div>
+	</section>
+</main>
+
+<footer class="footer footer--light">
+	<div class="container footer__inner">
+		<div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Ruşen Orçun Koçer</div>
+		<div class="muted">Anasayfa</div>
+	</div>
+</footer>
+
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Yönlendiriliyor… • KitapYurdu</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+</head>
+
+<body class="theme-light">
+<main class="container admin" style="max-width: 520px; padding-top: 42px;">
+	<section class="card">
+		<div class="card__header">
+			<h1 class="card__title">Giriş başarılı</h1>
+			<p class="card__desc">Yönlendiriliyorsun…</p>
+		</div>
+		<div class="card__body">
+			<p class="muted" style="margin:0;">
+				Eğer otomatik yönlendirilmezsen:
+				<a th:href="${to}" href="/" class="link">devam etmek için tıkla</a>.
+			</p>
+		</div>
+	</section>
+</main>
+
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+
+<script th:inline="javascript">
+	(function(){
+		const target = /*[[${to}]]*/ "/";
+
+		if (window.KYToast) {
+			KYToast.show("Giriş başarılı. Yönlendiriliyorsun…", "success");
+		}
+
+		setTimeout(function(){
+			window.location.href = target;
+		}, 2500);
+	})();
+</script>
+
+</body>
+</html>
