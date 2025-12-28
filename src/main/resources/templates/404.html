@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KitapYurdu • Sayfa Bulunamadı</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css" />
+    
+    <style>
+        .error-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            min-height: 60vh; /* Footer'ı aşağı itmek için */
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            line-height: 1;
+            opacity: 0.15; /* Arkaplana gömmek için silik */
+            margin-bottom: -2rem; /* Başlığın içine geçmesi için */
+            z-index: 0;
+        }
+        .error-content {
+            z-index: 1;
+            position: relative;
+        }
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="theme-light">
+
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" th:href="@{/}" href="/">
+            <span class="brand__mark">KY</span>
+            <span class="brand__text">KitapYurdu</span>
+        </a>
+
+        <nav class="nav">
+            <a class="nav__link" th:href="@{/}" href="/">Ana Sayfa</a>
+            <a class="nav__link" th:href="@{/katalog}" href="/katalog">Katalog</a>
+            <a class="nav__link" th:href="@{/sepet}" href="/sepet">
+                Sepet
+                <span class="pill" th:text="${cartCount != null ? cartCount : 0}">0</span>
+            </a>
+            <a class="nav__link" th:href="@{/profil}" href="/profil" sec:authorize="isAuthenticated()">Profil</a>
+        </nav>
+
+        <div class="topbar__actions">
+            <a class="btn btn--ghost" th:href="@{/admin}" href="/admin" sec:authorize="hasRole('ADMIN')">
+                Admin
+            </a>
+
+            <a class="btn btn--ghost" th:href="@{/login}" href="/login" sec:authorize="isAnonymous()">
+                Giriş
+            </a>
+
+            <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn--ghost">Çıkış</button>
+            </form>
+
+            <button class="themeToggle" type="button" data-theme-toggle aria-pressed="false">
+                <span class="themeIcon">☀️</span><span class="themeText">Açık</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="error-section">
+        
+        <div class="error-code">404</div>
+
+        <div class="error-content">
+            <span class="error-icon">📚</span> <h1 class="hero__title" style="margin-bottom: 1rem;">
+                Aradığınız Sayfa Raflarımızda Yok
+            </h1>
+            
+            <p class="hero__subtitle" style="max-width: 600px; margin: 0 auto 2rem auto;">
+                Ulaşmaya çalıştığınız kitap veya sayfa silinmiş, adı değiştirilmiş veya geçici olarak kütüphaneden kaldırılmış olabilir.
+            </p>
+
+            <div class="hero__cta" style="justify-content: center;">
+                <a class="btn btn--secondary" th:href="@{/}" href="/">Anasayfaya Dön</a>
+                <a class="btn btn--ghost" th:href="@{/katalog}" href="/katalog">Kataloğa Göz At</a>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<footer class="footer footer--light">
+    <div class="container footer__inner">
+        <div class="muted">© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> KitapYurdu</div>
+        <div class="muted">
+            <a th:href="@{/}" style="color: inherit; text-decoration: none;">Anasayfa</a>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/theme.js}" src="/js/theme.js"></script>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script th:src="@{/js/toast.js}" src="/js/toast.js"></script>
+
+</body>
+</html>
