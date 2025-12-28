@@ -13,6 +13,10 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 
 import java.io.IOException;
 
+/**
+ * Rol tabanlı başarılı kimlik doğrulama işleyicisi
+ * Giriş başarılı olduğunda kullanıcıyı uygun sayfaya yönlendirir
+ */
 public class RoleBasedSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -24,20 +28,23 @@ public class RoleBasedSuccessHandler extends SavedRequestAwareAuthenticationSucc
                                         Authentication authentication) throws ServletException, IOException {
 
         // Eğer kullanıcı admin sayfasına gitmek istemişse (SavedRequest) -> oraya dönsün
-        // SavedRequest yoksa role göre yönlendilir.
+        // SavedRequest yoksa rol göre yönlendilir.
         SavedRequest savedRequest = requestCache.getRequest(request, response);
         if (savedRequest != null) {
             super.onAuthenticationSuccess(request, response, authentication);
             return;
         }
 
+        // Kullanıcı ADMIN rolüne sahip mi kontrol et
         boolean isAdmin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(a -> a.equals("ROLE_ADMIN"));
 
         if (isAdmin) {
+            // Admin paneline yönlendir
             redirectStrategy.sendRedirect(request, response, "/admin");
         } else {
+            // Ana sayfaya yönlendir
             redirectStrategy.sendRedirect(request, response, "/");
         }
     }

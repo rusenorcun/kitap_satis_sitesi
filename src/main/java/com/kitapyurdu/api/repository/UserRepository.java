@@ -4,6 +4,10 @@ import com.kitapyurdu.api.auth.CustomUserDetails;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Kullanıcı Deposu
+ * Veritabanında kullanıcı bilgileriyle ilgili tüm sorguları gerçekleştirir
+ */
 @Repository
 public class UserRepository {
 
@@ -14,8 +18,8 @@ public class UserRepository {
 	}
 
 	/**
-	 * Login için kullanıcıyı (username veya email) ile bulur.
-	 * Durum=1 olmayanlar login olamaz.
+	 * Giriş için kullanıcıyı kullanıcı adı veya e-posta ile bul
+	 * Sadece aktif (Durum=1) kullanıcılar giriş yapabilir
 	 */
 	public CustomUserDetails findForLogin(String usernameOrEmail) {
 		String sql = """
@@ -33,12 +37,15 @@ public class UserRepository {
 					rs.getString("KullaniciAdi"),
 					rs.getString("Eposta"),
 					rs.getString("SifreHash"),
-					rs.getString("Rol"),      // DB: ADMIN / USER
+					rs.getString("Rol"),      // Veritabanı: ADMIN / USER
 					rs.getBoolean("Durum")
 			);
 		}, usernameOrEmail, usernameOrEmail);
 	}
 
+	/**
+	 * En az bir admin kullanıcısı var mı kontrol et
+	 */
 	public boolean existsAdmin() {
 		Integer cnt = jdbc.queryForObject(
 				"SELECT COUNT(1) FROM dbo.Kullanici WHERE Rol = N'ADMIN' AND Durum = 1",
@@ -47,6 +54,9 @@ public class UserRepository {
 		return cnt != null && cnt > 0;
 	}
 
+	/**
+	 * Belirtilen kullanıcı adı zaten var mı
+	 */
 	public boolean existsByKullaniciAdi(String kullaniciAdi) {
 		Integer c = jdbc.queryForObject(
 				"SELECT COUNT(1) FROM dbo.Kullanici WHERE KullaniciAdi = ?",
@@ -56,6 +66,9 @@ public class UserRepository {
 		return c != null && c > 0;
 	}
 
+	/**
+	 * Belirtilen e-posta zaten var mı
+	 */
 	public boolean existsByEposta(String eposta) {
 		Integer c = jdbc.queryForObject(
 				"SELECT COUNT(1) FROM dbo.Kullanici WHERE Eposta = ?",
@@ -66,14 +79,14 @@ public class UserRepository {
 	}
 
 	/**
-	 * Kayıt (register) için kullanıcı ekler.
-	 * DB'de Durum ve KayitTarihi DEFAULT ise otomatik dolar.
-	 * Rol: USER olarak atanır.
+	 * Kaydı (register) için yeni kullanıcı ekle
+	 * Durum ve KayitTarihi veritabanında otomatik dolar
+	 * Rol otomatik olarak USER olarak atanır
 	 */
 	public void insertUser(String kullaniciAdi, String eposta, String sifreHash,
 		String ad, String soyad, String telefon) {
 
-		// Telefon boş gelirse null olarak yazmak daha sağlıklı
+		// Telefon boş gelirse null olarak kaydet
 		String tel = (telefon == null || telefon.isBlank()) ? null : telefon.trim();
 
 		jdbc.update("""
@@ -83,6 +96,4 @@ public class UserRepository {
 				(?, ?, ?, ?, ?, ?, N'USER')
 			""", kullaniciAdi, eposta, sifreHash, ad, soyad, tel);
 	}
-
-	
 }

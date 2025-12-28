@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
 
+/**
+ * Alışveriş Sepeti Denetleyicisi
+ * Sepete ürün ekleme, çıkarma, güncelleme ve temizleme işlemlerini yönetir
+ */
 @Controller
 @RequestMapping("/sepet")
 public class SepetController extends BaseController{
@@ -19,13 +23,16 @@ public class SepetController extends BaseController{
 		this.sepetService = sepetService;
 	}
 
-	// Geçerli kullanıcının ID'sini Authentication objesinden yansıma ile alır
+	/**
+	 * Mevcut kullanıcının kimliğini Güvenlik objesinden al
+	 * Yansıma (reflection) kullanarak farklı metod adlarını dener
+	 */
 	private int currentKullaniciId() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null) throw new IllegalStateException("Auth yok");
+		if (auth == null) throw new IllegalStateException("Kimlik doğrulama bulunamadı");
 		Object principal = auth.getPrincipal();
 
-		// Yansıma ile farklı isimlerdeki getter metotlarını dene
+		// Farklı isimlerdeki getter metotlarını yansıma ile dene
 		for (String m : new String[]{"getKullaniciId", "getUserId", "getId"}) {
 			try {
 				Method mm = principal.getClass().getMethod(m);
@@ -35,9 +42,12 @@ public class SepetController extends BaseController{
 			} catch (Exception ignored) {}
 		}
 
-		throw new IllegalStateException("KullaniciId principal'dan okunamadı (CustomUserDetails getter kontrol et).");
+		throw new IllegalStateException("Kullanıcı kimliği principal'dan okunamadı (CustomUserDetails getter'ını kontrol et).");
 	}
 
+	/**
+	 * Alışveriş sepeti sayfasını göster
+	 */
 	@GetMapping
 	public String sepet(Model model) {
 		int kullaniciId = currentKullaniciId();
@@ -48,6 +58,9 @@ public class SepetController extends BaseController{
 		return "sepet";
 	}
 
+	/**
+	 * Sepete ürün ekle
+	 */
 	@PostMapping("/ekle")
 	public String ekle(@RequestParam int bookId,
 						@RequestParam(defaultValue = "1") int qty,
@@ -58,6 +71,9 @@ public class SepetController extends BaseController{
 		return "redirect:" + (referer != null ? referer : "/katalog");
 	}
 
+	/**
+	 * Sepetteki ürün miktarını güncelle
+	 */
 	@PostMapping("/guncelle")
 	public String guncelle(@RequestParam int bookId,
 							@RequestParam int qty) {
@@ -67,6 +83,9 @@ public class SepetController extends BaseController{
 		return "redirect:/sepet";
 	}
 
+	/**
+	 * Sepetten ürün çıkar
+	 */
 	@PostMapping("/sil")
 	public String sil(@RequestParam int bookId) {
 		int kullaniciId = currentKullaniciId();
@@ -74,11 +93,13 @@ public class SepetController extends BaseController{
 		return "redirect:/sepet";
 	}
 
+	/**
+	 * Sepeti tamamen temizle
+	 */
 	@PostMapping("/temizle")
 	public String temizle() {
 		int kullaniciId = currentKullaniciId();
 		sepetService.clear(kullaniciId);
 		return "redirect:/sepet";
 	}
-	
 }

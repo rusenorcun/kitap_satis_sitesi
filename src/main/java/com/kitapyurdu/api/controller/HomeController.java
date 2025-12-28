@@ -6,6 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * Ana Sayfa Denetleyicisi
+ * Sitesinin başlıca sayfasını yönetir
+ */
 @Controller
 public class HomeController extends BaseController{
 
@@ -17,16 +21,21 @@ public class HomeController extends BaseController{
         this.kitapRepo = kitapRepo;
     }
 
+    /**
+     * Ana sayfayı göster
+     * İstatistikler ve öne çıkan ürünleri ekle
+     */
     @GetMapping("/")
     public String home(Model model) {
 
         // İstatistikler
         model.addAttribute("toplamKitapSayisi", adminRepo.toplamKitap());
-        model.addAttribute("aktifKitapSayisi", adminRepo.toplamKitap()); // istersen ayrı metotla "Durum=1" saydırırız
+        model.addAttribute("aktifKitapSayisi", adminRepo.toplamKitap()); // İstenirse ayrı metotla "Durum=1" olarak sayılandırılabilir
         model.addAttribute("yayineviSayisi", adminRepo.yayineviSayisi());
 
-        // Ana sayfa vitrin
+        // Ana sayfa vitrini - öne çıkan ürünler
         model.addAttribute("featured", kitapRepo.featured(8));
+        // Sınırlı stoklu ürünler
         model.addAttribute("limited", kitapRepo.limitedStock(5, 8));
 
         return "index";

@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.lang.reflect.Method;
 
+/**
+ * Global Model Tavsiyeleri
+ * Tüm denetleyiciler için genel model öznitelikleri sağlar
+ */
 @ControllerAdvice
 public class GlobalModelAdvice extends BaseController{
 
@@ -17,12 +21,17 @@ public class GlobalModelAdvice extends BaseController{
 		this.sepetService = sepetService;
 	}
 
+	/**
+	 * Güvenlik bağlamından mevcut kullanıcı kimliğini al
+	 * Giriş yapılmamışsa null döndür
+	 */
 	private Integer currentKullaniciIdOrNull() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null || !auth.isAuthenticated()) return null;
 		Object principal = auth.getPrincipal();
 		if (principal == null) return null;
 
+		// Farklı metod adlarıyla kullanıcı kimliğini bulmaya çalış
 		for (String m : new String[]{"getKullaniciId", "getUserId", "getId"}) {
 			try {
 				Method mm = principal.getClass().getMethod(m);
@@ -34,6 +43,10 @@ public class GlobalModelAdvice extends BaseController{
 		return null;
 	}
 
+	/**
+	 * Alışveriş sepeti ürün sayısını döndür
+	 * Tüm şablonlara otomatik olarak "cartCount" olarak eklenir
+	 */
 	@ModelAttribute("cartCount")
 	public int cartCount() {
 		Integer kid = currentKullaniciIdOrNull();

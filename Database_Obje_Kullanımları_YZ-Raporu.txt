@@ -1,0 +1,359 @@
+================================================================================
+                    DATABASE OBJECTS SCAN REPORT
+                Repository Layer Analysis
+================================================================================
+Date: December 28, 2025
+Project: Kitap Yurdu API
+Scan Path: src/main/java/com/kitapyurdu/api/repository/
+
+================================================================================
+                        COMPREHENSIVE LISTING
+================================================================================
+
+------- AdminOrderRepository.java -------
+Stored Procedures:
+  1. sp_AdminSiparisListele (Line 24)
+     - Purpose: List all admin orders
+     - Method: tumSiparisleriGetir()
+  
+  2. sp_SiparisDurumGuncelle (Line 25)
+     - Purpose: Update order status
+     - Method: durumGuncelle()
+
+SQL Queries:
+  1. SELECT DurumAdi FROM dbo.SiparisDurum (Line 59)
+     - Method: getDurumListesi()
+
+
+------- AdminRepository.java -------
+Functions:
+  1. dbo.fn_KitapSay() (Line 25)
+     - Purpose: Count active books with filters
+     - Method: aktifKitap()
+  
+  2. dbo.fn_YayineviKitapSayisi() (Line 196)
+     - Purpose: Count books per publisher
+     - Method: yayineviKitapSayisi()
+
+Views:
+  1. dbo.vw_KitapListe (Lines 38, 42)
+     - Purpose: Book list with details
+     - Methods: toplamKitap(), toplamStok()
+
+Stored Procedures:
+  1. sp_Yayinevi_Listele (Line 49)
+     - Purpose: List publishers
+     - Method: yayineviOptions()
+  
+  2. sp_Admin_Stok_Listele (Line 60)
+     - Purpose: List stock with filtering
+     - Method: stokRows()
+  
+  3. sp_KitapStokDurumGuncelle (Line 77)
+     - Purpose: Update book stock and status
+     - Method: stokDurumGuncelle()
+  
+  4. sp_KitapSil (Line 82)
+     - Purpose: Delete book
+     - Method: kitapSil()
+  
+  5. sp_YayineviEkle (Line 86)
+     - Purpose: Add publisher
+     - Method: yayineviEkle()
+  
+  6. sp_YayineviSil (Line 90)
+     - Purpose: Delete publisher
+     - Method: yayineviSil()
+  
+  7. sp_Kullanici_Rol_Guncelle (Lines 95, 104)
+     - Purpose: Update user role
+     - Methods: rolVer(), rolKaldir()
+  
+  8. sp_Admin_Kullanici_Listele (Line 115)
+     - Purpose: List users
+     - Method: listUsers()
+  
+  9. sp_Yayinevi_Listele_With_Count (Line 123)
+     - Purpose: List publishers with book count
+     - Method: listYayinevleri()
+  
+  10. sp_Yayinevi_Getir (Line 154)
+      - Purpose: Get publisher by ID
+      - Method: findYayineviForm()
+  
+  11. sp_Yayinevi_Guncelle (Line 169)
+      - Purpose: Update publisher
+      - Method: yayineviGuncelle()
+  
+  12. sp_Kitap_AzStok_Listele (Line 187)
+      - Purpose: List low stock books
+      - Method: lowStockRows()
+  
+  13. sp_Yayinevi_Bos_Listele (Line 212)
+      - Purpose: List empty publishers
+      - Method: emptyPublishers()
+
+
+------- BookDetailRepo.java -------
+Stored Procedures:
+  1. sp_KullaniciIdGetirByKullaniciAdi (Line 25)
+     - Purpose: Get user ID by username
+     - Method: findUserIdByUsername()
+  
+  2. sp_KitapDetayGetir (Line 34)
+     - Purpose: Get book detail
+     - Method: getBookDetail()
+  
+  3. sp_KitapGorselListele (Line 41)
+     - Purpose: List book images
+     - Method: listImages()
+  
+  4. sp_KitapYazarListele (Line 55)
+     - Purpose: List book authors
+     - Method: listAuthors()
+  
+  5. sp_KitapKategoriListele (Line 68)
+     - Purpose: List book categories
+     - Method: listCategories()
+  
+  6. sp_KitapYorumListele (Line 81)
+     - Purpose: List book reviews
+     - Method: listReviews()
+  
+  7. sp_FavoriToggle (Line 106)
+     - Purpose: Toggle favorite status
+     - Method: toggleFavorite()
+  
+  8. sp_SepeteEkle (Line 122)
+     - Purpose: Add to cart
+     - Method: addToCart()
+     - Note: Called via CallableStatement
+
+
+------- CatalogRepository.java -------
+No Stored Procedures, Views, or Functions
+
+Note: Uses direct table queries with complex SQL including:
+- dbo.Kitap
+- dbo.Yayinevi
+- dbo.Kategori
+- dbo.KitapKategori
+- STRING_AGG() function (SQL Server built-in)
+
+
+------- CheckoutRepository.java -------
+Stored Procedures:
+  1. sp_CheckoutAdresListele (Line 29)
+     - Purpose: List checkout addresses
+     - Method: getAdresler()
+  
+  2. sp_CheckoutSepetKalemListele (Line 30)
+     - Purpose: List cart items for checkout
+     - Method: getSepetKalemler()
+  
+  3. sp_CheckoutSepetOzetGetir (Line 31)
+     - Purpose: Get cart summary
+     - Method: getSepetOzet()
+     - Note: Contains function usage
+  
+  4. sp_SiparisOlustur (Line 33)
+     - Purpose: Create order
+     - Method: siparisOlustur()
+  
+  5. sp_OdemeKaydet (Line 35-42)
+     - Purpose: Record payment
+     - Method: odemeKaydet()
+     - Note: Includes OUTPUT parameter
+
+SQL Queries:
+  1. SELECT TOP(1) KullaniciId FROM dbo.Kullanici (Line 50)
+     - Method: getKullaniciIdByAuthName()
+  
+  2. SELECT YontemAdi FROM dbo.OdemeYontem (Line 56)
+     - Method: getOdemeYontemleri()
+  
+  3. SELECT GenelToplam FROM dbo.Siparis (Line 110)
+     - Method: getSiparisGenelToplam()
+
+
+------- KitapRepository.java -------
+Views:
+  1. dbo.vw_KitapListe (Lines 25, 174, 195)
+     - Purpose: Book list view
+     - Methods: list(), featured(), limitedStock()
+
+Stored Procedures:
+  1. sp_KitapEkleGuncelle (Line 101)
+     - Purpose: Add/Update book
+     - Method: kitapEkleGuncelle()
+     - Note: Includes OUTPUT parameter @YeniKitapId
+
+
+------- ProfileRepository.java -------
+Views:
+  1. dbo.vw_ProfilSiparisleri (Line 228)
+     - Purpose: User orders view
+     - Method: listOrders()
+
+Stored Procedures:
+  1. sp_AdresEkle (Line 80)
+     - Purpose: Add address
+     - Method: spAdresEkle()
+     - Note: Includes OUTPUT parameter @AdresId
+  
+  2. sp_FavoriToggle (Line 117)
+     - Purpose: Toggle favorite
+     - Method: spFavoriToggle()
+
+
+------- SepetRepository.java -------
+Functions:
+  1. dbo.fn_SepetUrunAdet() (Line 97)
+     - Purpose: Get cart item count
+     - Method: getSepetUrunAdedi()
+
+Stored Procedures:
+  1. sp_SepeteEkle (Line 28)
+     - Purpose: Add to cart
+     - Method: spSepeteEkle()
+     - Note: Called via CallableStatement with OUTPUT parameter
+  
+  2. sp_SepetKalemGuncelle (Line 38)
+     - Purpose: Update cart item
+     - Method: spSepetKalemGuncelle()
+  
+  3. sp_SepetIcerigiGetir (Line 49)
+     - Purpose: Get cart contents
+     - Method: listSepetItems()
+
+
+------- UserRepository.java -------
+No Stored Procedures, Views, or Functions
+
+Note: Uses only direct table queries (dbo.Kullanici)
+
+
+================================================================================
+                            STATISTICS
+================================================================================
+
+Total Stored Procedures:  32
+Total Views:              3
+Total Functions:          3
+Total Database Objects:   38
+
+Files Analyzed:           9
+Files with DB Objects:    8
+Files without DB Objects: 1
+
+
+================================================================================
+                        STORED PROCEDURES SUMMARY
+================================================================================
+
+Admin & Publisher Management:
+  - sp_Yayinevi_Listele
+  - sp_Yayinevi_Listele_With_Count
+  - sp_Yayinevi_Getir
+  - sp_Yayinevi_Guncelle
+  - sp_YayineviEkle
+  - sp_YayineviSil
+  - sp_Yayinevi_Bos_Listele
+
+Book Management:
+  - sp_KitapSil
+  - sp_KitapEkleGuncelle
+  - sp_KitapStokDurumGuncelle
+  - sp_Admin_Stok_Listele
+  - sp_Kitap_AzStok_Listele
+
+Book Details & Reviews:
+  - sp_KitapDetayGetir
+  - sp_KitapGorselListele
+  - sp_KitapYazarListele
+  - sp_KitapKategoriListele
+  - sp_KitapYorumListele
+
+User & Authentication:
+  - sp_Kullanici_Rol_Guncelle
+  - sp_KullaniciIdGetirByKullaniciAdi
+  - sp_Admin_Kullanici_Listele
+
+Orders & Checkout:
+  - sp_AdminSiparisListele
+  - sp_SiparisDurumGuncelle
+  - sp_SiparisOlustur
+  - sp_OdemeKaydet
+
+Cart & Shopping:
+  - sp_CheckoutAdresListele
+  - sp_CheckoutSepetKalemListele
+  - sp_CheckoutSepetOzetGetir
+  - sp_SepeteEkle
+  - sp_SepetKalemGuncelle
+  - sp_SepetIcerigiGetir
+
+Favorites:
+  - sp_FavoriToggle (in BookDetailRepo and ProfileRepository)
+
+
+================================================================================
+                          VIEWS SUMMARY
+================================================================================
+
+1. dbo.vw_KitapListe (Used in 3 methods)
+   - AdminRepository: toplamKitap(), toplamStok()
+   - KitapRepository: list(), featured(), limitedStock()
+   - Purpose: Book listing with categories and ratings
+
+2. dbo.vw_ProfilSiparisleri (Used in 1 method)
+   - ProfileRepository: listOrders()
+   - Purpose: User order history
+
+3. Note: sp_CheckoutSepetOzetGetir uses function internally
+
+
+================================================================================
+                        FUNCTIONS SUMMARY
+================================================================================
+
+1. dbo.fn_KitapSay()
+   - Location: AdminRepository.aktifKitap()
+   - Purpose: Count active books with parameters
+
+2. dbo.fn_YayineviKitapSayisi()
+   - Location: AdminRepository.yayineviKitapSayisi()
+   - Purpose: Get book count for specific publisher
+
+3. dbo.fn_SepetUrunAdet()
+   - Location: SepetRepository.getSepetUrunAdedi()
+   - Purpose: Get total product count in cart
+
+
+================================================================================
+                    IMPORTANT NOTES
+================================================================================
+
+1. OUTPUT Parameters:
+   - sp_KitapEkleGuncelle: @YeniKitapId
+   - sp_AdresEkle: @AdresId
+   - sp_OdemeKaydet: @OdemeId
+
+2. Duplicate Procedures:
+   - sp_FavoriToggle appears in both BookDetailRepo and ProfileRepository
+
+3. Callable Statements:
+   - sp_SepeteEkle (BookDetailRepo & SepetRepository)
+   - sp_SepetKalemGuncelle (SepetRepository)
+
+4. View Dependencies:
+   - vw_KitapListe is heavily used (5 occurrences)
+   - This indicates it's a critical view for book listing
+
+5. Data Types:
+   - Most functions and procedures use INTEGER, VARCHAR, DECIMAL, TIMESTAMP
+   - OUTPUT parameters are primarily INTEGER (IDs)
+
+================================================================================
+                        END OF REPORT
+================================================================================

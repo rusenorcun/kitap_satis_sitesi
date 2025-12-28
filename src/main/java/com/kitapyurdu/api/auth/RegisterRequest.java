@@ -1,5 +1,9 @@
 package com.kitapyurdu.api.auth;
 
+/**
+ * Kayıt İsteği DTO
+ * Kullanıcı kaydı sırasında gönderilen verileri tutar
+ */
 public class RegisterRequest {
 	private String ad;
 	private String soyad;
@@ -9,8 +13,8 @@ public class RegisterRequest {
 	private String password2;
 	private String telefon;
 
+	// ============ Getter ve Setter Metotları ============
 
-	// Getters and Setters
 	public String getAd() { return ad; }
 	public void setAd(String ad) { this.ad = ad; }
 

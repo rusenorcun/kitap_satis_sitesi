@@ -7,25 +7,32 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.kitapyurdu.api.repository.SepetRepository;
 
-@ControllerAdvice // Bu anotasyon, tüm Controller'ları kapsamasını sağlar
+/**
+ * Global Veri Denetleyicisi
+ * Tüm denetleyicileri kapsar ve sepet sayısını modele ekler
+ */
+@ControllerAdvice
 public class GlobalDataController extends BaseController{
 
     @Autowired
-    private SepetRepository SepetRepository; // Repository adın neyse onu yaz
+    private SepetRepository SepetRepository;
 
-    // Bu metod her istekte çalışır ve model'e "SepetCount" ekler
+    /**
+     * Her istekte çalışır ve modele "SepetCount" ekler
+     * Oturumdan sepet kimliğini alır ve veritabanından güncel ürün sayısını döndürür
+     */
     @ModelAttribute("SepetCount")
     public int addSepetCountToModel(HttpSession session) {
         
-        // 1. Session'dan sepet ID'yi al (login logic'ine göre değişebilir)
+        // 1) Oturumdan sepet kimliğini al
         Integer sepetId = (Integer) session.getAttribute("sepetId");
 
-        // 2. Eğer session'da sepet yoksa 0 döndür
+        // 2) Oturumda sepet yoksa sıfır döndür
         if (sepetId == null) {
             return 0;
         }
 
-        // 3. Varsa veritabanından güncel sayıyı çek
+        // 3) Varsa veritabanından güncel ürün sayısını çek ve döndür
         return SepetRepository.getSepetUrunAdedi(sepetId);
     }
 }// yapay zeka yapımı

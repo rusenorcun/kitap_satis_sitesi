@@ -13,6 +13,10 @@ import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Rol tabanlı geciktirilmiş başarılı kimlik doğrulama işleyicisi
+ * Giriş başarılı olduğunda toast mesajı göstermek için yönlendirmeyi geciktirir
+ */
 public class RoleBasedDelayedSuccessHandler implements org.springframework.security.web.authentication.AuthenticationSuccessHandler {
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -23,25 +27,26 @@ public class RoleBasedDelayedSuccessHandler implements org.springframework.secur
                                         HttpServletResponse response,
                                         Authentication authentication) throws java.io.IOException {
 
-        // 1) Önce kaydedilmiş isteği kontrol etme
+        // 1) Kaydedilmiş isteği kontrol et
         SavedRequest saved = requestCache.getRequest(request, response);
         String target;
 
         if (saved != null && saved.getRedirectUrl() != null) {
+            // Kullanıcı giriş yapmadan önceki sayfaya git
             target = saved.getRedirectUrl();
             requestCache.removeRequest(request, response);
         } else {
             // 2) Rol tabanlı yönlendirme
-            // Eğer kullanıcı admin sayfasına gitmek istemişse (SavedRequest) -> oraya dönsün
-            // SavedRequest yoksa role göre yönlendirme yapalır.
+            // Kullanıcı ADMIN rolüne sahip mi kontrol et
             boolean isAdmin = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .anyMatch(a -> a.equals("ROLE_ADMIN"));
 
+            // Hedef sayfayı belirle
             target = isAdmin ? "/admin" : "/";
         }
 
-        // 3) Toast.js ile mesaj göstermek için yönlendirme URL'sine parametre ekleme ve gecikmeli yönlendirme.
+        // 3) Toast.js ile mesaj göstermek için yönlendirme URL'sine parametre ekle
         String to = UriUtils.encodeQueryParam(target, StandardCharsets.UTF_8);
         redirectStrategy.sendRedirect(request, response, "/login/success?to=" + to);
     }

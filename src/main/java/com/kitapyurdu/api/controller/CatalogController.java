@@ -14,6 +14,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Katalog Denetleyicisi
+ * Ürün kataloğunu görüntüleme, arama ve filtreleme işlemlerini sağlar
+ */
 @Controller
 public class CatalogController extends BaseController{
 
@@ -23,15 +27,20 @@ public class CatalogController extends BaseController{
         this.catalog = catalog;
     }
 
-    // Get current user ID from Security context
+    /**
+     * Güvenlik bağlamından mevcut kullanıcı kimliğini al
+     * Giriş yapılmamışsa -1 döndür
+     */
     private int currentKullaniciId() {
+        // Kimlik doğrulama bilgisini al
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return -1; // Not authenticated
+        if (auth == null || !auth.isAuthenticated()) return -1;
         
+        // Anonim kullanıcı kontrolü
         Object principal = auth.getPrincipal();
-        if (principal.equals("anonymousUser")) return -1; // Anonymous user
+        if (principal.equals("anonymousUser")) return -1;
 
-        // Try to get ID using reflection on different method names
+        // Farklı metod adlarıyla kullanıcı kimliğini bulmaya çalış
         for (String m : new String[]{"getKullaniciId", "getUserId", "getId"}) {
             try {
                 Method mm = principal.getClass().getMethod(m);
@@ -41,9 +50,13 @@ public class CatalogController extends BaseController{
             } catch (Exception ignored) {}
         }
 
-        return -1; // Could not get ID
+        return -1;
     }
 
+    /**
+     * Ürün kataloğunu göster
+     * Arama, kategori ve yayınevi filtrelemesi, fiyat aralığı seçimi ve sıralama destekler
+     */
     @GetMapping("/katalog")
     public String katalog(
             @RequestParam(required = false) String q,
@@ -57,6 +70,7 @@ public class CatalogController extends BaseController{
             @RequestParam(defaultValue = "12") Integer size,
             Model model
     ) {
+        // Filtre nesnesi oluştur ve parametreleri doldur
         CatalogFilter f = new CatalogFilter();
         f.q = q;
         f.categoryId = categoryId;
@@ -68,13 +82,16 @@ public class CatalogController extends BaseController{
         f.page = (page == null || page < 1) ? 1 : page;
         f.size = (size == null || size < 1) ? 12 : size;
 
+        // Ürünleri ara ve toplam sayıyı al
         var books = catalog.search(f);
         int total = catalog.count(f);
         int pageCount = Math.max(1, (int) Math.ceil(total / (double) f.size));
 
+        // Filtreleme seçeneklerini al
         var categories = catalog.categories();
         var publishers = catalog.publishers();
 
+        // Etkin filtreleri listele
         List<String> activeFilters = new ArrayList<>();
         if (q != null && !q.isBlank()) activeFilters.add("Arama: " + q.trim());
         if (categoryId != null) activeFilters.add("KategoriId: " + categoryId);
@@ -84,6 +101,7 @@ public class CatalogController extends BaseController{
         if (Boolean.TRUE.equals(inStock)) activeFilters.add("Stokta");
         if (f.sort != null && !f.sort.isBlank()) activeFilters.add("Sırala: " + f.sort);
 
+        // Sayfaya eklenecek öznitelikleri hazırla
         model.addAttribute("books", books);
         model.addAttribute("total", total);
 
@@ -103,7 +121,7 @@ public class CatalogController extends BaseController{
 
         model.addAttribute("activeFilters", activeFilters);
 
-        // Get cart count for authenticated user
+        // Kimlik doğrulanmış kullanıcı için alışveriş sepeti sayısını al
         int kullaniciId = currentKullaniciId();
         int cartCount = 0;
         if (kullaniciId > 0) {
